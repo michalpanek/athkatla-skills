@@ -1,4 +1,4 @@
-thkatla-skills
+Athkatla-skills
 
 This is a personal agent skills marketplace repo.
 
