@@ -1,0 +1,8 @@
+": {
+    "name": "athkatla-skills",
+    "description": "Personal collection of agent skills — code, productivity, and beyond. Model agnostic.",
+    "author": "michalpanek",
+    "pluginRoot": "./skills"
+  },
+  "plugins": []
+}
