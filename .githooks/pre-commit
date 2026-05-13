@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Pre-commit hook: validate plugin marketplace schema before allowing commit.
+#
+# One-time install per developer clone:
+#   git config core.hooksPath .githooks
+#
+# To bypass for a single commit (use sparingly):
+#   git commit --no-verify
+set -euo pipefail
+
+REPO_ROOT="$(git rev-parse --show-toplevel)"
+cd "${REPO_ROOT}"
+
+# Only run when plugin/marketplace files are staged
+STAGED_RELEVANT="$(git diff --cached --name-only --diff-filter=ACM | grep -E '(\.claude-plugin/(marketplace|plugin)\.json|skills/.+/SKILL\.md|hooks\.json)$' || true)"
+
+if [[ -z "${STAGED_RELEVANT}" ]]; then
+  exit 0
+fi
+
+if ! command -v claude >/dev/null 2>&1; then
+  echo "WARN: 'claude' CLI not found on PATH — skipping plugin validation." >&2
+  echo "      Install Claude Code to enable: https://code.claude.com/docs/en/quickstart" >&2
+  exit 0
+fi
+
+echo "Running: claude plugin validate ."
+if ! claude plugin validate . ; then
+  echo >&2
+  echo "✗ Plugin marketplace validation failed. Fix the errors above before committing." >&2
+  echo "  To bypass (NOT recommended): git commit --no-verify" >&2
+  exit 1
+fi
+
+echo "✓ Plugin marketplace validation passed."

@@ -1,0 +1,46 @@
+# Validate plugin marketplace schema on every push, PR, release, or manual dispatch.
+# Security note: this workflow does NOT consume any untrusted input from
+# github.event.* (issue titles, PR descriptions, commit messages, head_ref, etc.).
+# It only runs static schema validation against the checked-out files.
+name: Validate plugin marketplace
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: JSON syntax check (fast fail before installing claude)
+        run: |
+          set -euo pipefail
+          fail=0
+          while IFS= read -r f; do
+            if ! python3 -m json.tool < "$f" > /dev/null; then
+              echo "::error file=$f::Invalid JSON syntax"
+              fail=1
+            fi
+          done < <(find . -path ./.git -prune -o -name '*.json' -print)
+          exit $fail
+
+      - name: Install Claude Code CLI
+        run: |
+          curl -fsSL https://claude.ai/install.sh | bash
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Verify claude CLI is on PATH
+        run: claude --version
+
+      - name: Validate plugin marketplace schema
+        run: claude plugin validate .
