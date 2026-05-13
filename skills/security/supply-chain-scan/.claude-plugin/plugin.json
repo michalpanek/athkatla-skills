@@ -2,7 +2,9 @@
   "name": "supply-chain-scan",
   "version": "0.1.0",
   "description": "Scan project dependencies for supply-chain risks: typosquatting, postinstall scripts, recent ownership changes, advisories. Manual invocation only.",
-  "author": "michalpanek",
+  "author": {
+    "name": "michalpanek"
+  },
   "license": "MIT",
   "homepage": "https://github.com/michalpanek/athkatla-skills"
 }

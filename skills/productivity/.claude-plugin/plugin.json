@@ -2,7 +2,9 @@
   "name": "productivity",
   "version": "0.1.0",
   "description": "General non-code productivity assistance: triaging, summarizing, drafting, batch handling. Auto-triggers when relevant.",
-  "author": "michalpanek",
+  "author": {
+    "name": "michalpanek"
+  },
   "license": "MIT",
   "homepage": "https://github.com/michalpanek/athkatla-skills"
 }

@@ -2,7 +2,9 @@
   "name": "java-review",
   "version": "0.1.0",
   "description": "Opinionated Java code review skills (Spring Boot-focused). Auto-detects stack (Spring Boot starters, JPA, Lombok, Vavr, Resilience4j, Spock, RabbitMQ, etc.) and applies only rules for tools in use. Single-agent and 5-parallel-subagent variants. Manual invocation only.",
-  "author": "michalpanek",
+  "author": {
+    "name": "michalpanek"
+  },
   "license": "MIT",
   "homepage": "https://github.com/michalpanek/athkatla-skills"
 }

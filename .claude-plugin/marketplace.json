@@ -1,8 +1,7 @@
 {
   "name": "athkatla-skills",
   "owner": {
-    "name": "michalpanek",
-    "url": "https://github.com/michalpanek"
+    "name": "michalpanek"
   },
   "metadata": {
     "description": "Personal collection of agent skills. Code review, productivity, security, and more. Model agnostic.",
