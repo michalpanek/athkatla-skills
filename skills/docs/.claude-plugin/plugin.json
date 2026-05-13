@@ -1,0 +1,8 @@
+{
+  "name": "docs",
+  "version": "0.1.0",
+  "description": "Enforce documentation conventions and structure: README sections, code-block language tags, link health, heading hierarchy, ADR format. Auto-triggers on documentation work.",
+  "author": "michalpanek",
+  "license": "MIT",
+  "homepage": "https://github.com/michalpanek/athkatla-skills"
+}

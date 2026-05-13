@@ -1,0 +1,9 @@
+# --lifecycle input — one keyword per line.
+# A package.json is flagged if any of its "preinstall" / "postinstall" / "prepare"
+# script values contains ANY of these substrings. Keep keywords specific enough
+# to avoid false positives (e.g. avoid generic words like "node" or "install").
+
+evil_runner
+@example-scope/setup
+stolen_setup
+bun_environment

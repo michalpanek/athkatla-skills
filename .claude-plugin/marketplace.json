@@ -1,8 +1,69 @@
-": {
-    "name": "athkatla-skills",
-    "description": "Personal collection of agent skills — code, productivity, and beyond. Model agnostic.",
-    "author": "michalpanek",
-    "pluginRoot": "./skills"
+{
+  "name": "athkatla-skills",
+  "owner": {
+    "name": "michalpanek",
+    "url": "https://github.com/michalpanek"
   },
-  "plugins": []
+  "metadata": {
+    "description": "Personal collection of agent skills. Code review, productivity, security, and more. Model agnostic.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "ts-review",
+      "source": "./skills/code-review/ts",
+      "description": "Opinionated TypeScript / JavaScript code review skills. Auto-detects stack (Next.js, React, Drizzle, next-safe-action, Zod, Tailwind, Vitest, etc.) and applies only rules for tools in use. Single-agent (/ts-review) and 5-parallel-subagent (/ts-review-multi-agent) variants. Manual invocation only.",
+      "version": "0.1.0",
+      "category": "code-review",
+      "tags": ["code-review", "typescript", "javascript", "react", "nextjs", "pr-review"]
+    },
+    {
+      "name": "java-review",
+      "source": "./skills/code-review/java",
+      "description": "Opinionated Java code review skills (Spring Boot-focused). Auto-detects stack (Spring Boot starters, JPA, Lombok, Vavr, Resilience4j, Spock, RabbitMQ, etc.) and applies only rules for tools in use. Single-agent (/java-review) and 5-parallel-subagent (/java-review-multi-agent) variants. Manual invocation only.",
+      "version": "0.1.0",
+      "category": "code-review",
+      "tags": ["code-review", "java", "spring-boot", "jpa", "pr-review"]
+    },
+    {
+      "name": "dependabot-review",
+      "source": "./skills/security/dependabot-review",
+      "description": "Review one or more open Dependabot PRs for security and breaking-change impact. Returns per-PR risk verdict and suggested merge order. Manual invocation only.",
+      "version": "0.1.0",
+      "category": "security",
+      "tags": ["security", "dependabot", "dependencies", "pr-review"]
+    },
+    {
+      "name": "dependabot-batch-updates-pr",
+      "source": "./skills/security/dependabot-batch-updates-pr",
+      "description": "Triage and batch-process Dependabot updates on a GitHub repo: open Dependabot PRs plus vulnerability alerts that have no PR. Severity-filtered (default high+critical, prompt for medium+low). Cherry-picks open PRs as clean linear commits on a dedicated branch. Manual invocation only.",
+      "version": "0.1.0",
+      "category": "security",
+      "tags": ["security", "dependabot", "dependencies", "pr-batch", "vulnerability-triage"]
+    },
+    {
+      "name": "supply-chain-scan",
+      "source": "./skills/security/supply-chain-scan",
+      "description": "Scan project dependencies (incl. transitive) for supply-chain risks: typosquats, suspicious postinstalls, recent ownership changes, known IOCs. Manual invocation only.",
+      "version": "0.1.0",
+      "category": "security",
+      "tags": ["security", "supply-chain", "dependencies", "scan"]
+    },
+    {
+      "name": "docs",
+      "source": "./skills/docs",
+      "description": "Enforce documentation conventions: README structure, heading hierarchy, code-block language tags, link health, ADR format, changelog discipline. Auto-triggers on doc edits.",
+      "version": "0.1.0",
+      "category": "docs",
+      "tags": ["docs", "documentation", "readme", "adr", "markdown"]
+    },
+    {
+      "name": "productivity",
+      "source": "./skills/productivity",
+      "description": "General non-code productivity: drafting, summarizing, triaging, planning. Auto-triggers when relevant.",
+      "version": "0.1.0",
+      "category": "productivity",
+      "tags": ["productivity", "drafting", "summarizing", "triage"]
+    }
+  ]
 }

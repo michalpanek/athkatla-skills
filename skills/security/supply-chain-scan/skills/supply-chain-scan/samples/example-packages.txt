@@ -1,0 +1,12 @@
+# --packages input — one "package@version" per line.
+# Lines starting with "#" and blank lines are ignored.
+# Replace these with real entries from your advisory source.
+
+# Plain (unscoped) package
+example-package@1.2.3
+
+# Scoped package
+@example-scope/example-pkg@4.5.6
+
+# Pre-release / build-metadata versions are matched literally
+@example-scope/another-pkg@2.0.0-rc.1

@@ -1,0 +1,8 @@
+{
+  "name": "ts-review",
+  "version": "0.1.0",
+  "description": "Opinionated TypeScript / JavaScript code review skills. Auto-detects stack (Next.js, React, Drizzle, next-safe-action, Zod, Tailwind, Vitest, etc.) and applies only rules for tools in use. Single-agent and 5-parallel-subagent variants. Manual invocation only.",
+  "author": "michalpanek",
+  "license": "MIT",
+  "homepage": "https://github.com/michalpanek/athkatla-skills"
+}

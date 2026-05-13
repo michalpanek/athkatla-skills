@@ -1,0 +1,8 @@
+{
+  "name": "dependabot-review",
+  "version": "0.1.0",
+  "description": "Review Dependabot pull requests for security and compatibility impact. Manual invocation only.",
+  "author": "michalpanek",
+  "license": "MIT",
+  "homepage": "https://github.com/michalpanek/athkatla-skills"
+}

@@ -1,0 +1,8 @@
+# --iocs input — one filename basename per line.
+# Files whose basename matches will be reported under the IOC category.
+# Replace these with real IOC filenames from your advisory source.
+
+evil_runner.js
+suspicious_setup.js
+stolen_secrets.json
+exfil_payload.bin

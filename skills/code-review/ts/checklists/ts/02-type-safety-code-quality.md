@@ -1,0 +1,128 @@
+# Type Safety & Code Quality
+
+## Error Handling
+- [ ] **`executeQuery` pattern in repositories**: all DB calls wrapped, returning `Result<T>` (success/failure discriminated union)
+- [ ] **`ActionError` with context in actions**: always include `action` name and `resourceId` for debugging
+- [ ] **Database errors detected and logged**: `isDatabaseError()` type guard captures PostgreSQL metadata (code, table, constraint, severity)
+- [ ] **No silent error swallowing**: never `catch (e) { return null }` without logging or throwing
+- [ ] **File upload errors must throw**: return `ActionError`, not `null`, on upload failure
+- [ ] **Structured logger from your structured logger package**: use `getLogger()` / `createChildLogger()`, never `console.log` or `console.error`
+- [ ] **Error types discriminated**: `ErrorCode.NOT_FOUND`, `VALIDATION`, `UNKNOWN`, `UNAUTHENTICATED` mapped to HTTP status codes
+- [ ] **API routes use `handleExecuteQueryErrorWithResponse()`**: automatic error-to-HTTP-status mapping
+- [ ] **`generateErrorResponse()` for API errors**: standardized `{ error, details }` JSON responses
+- [ ] **Error messages don't leak internals**: generic messages to client, full details logged server-side
+- [ ] **Auth failures redirect or return 401/403**: `authorizeApi()` for redirects, `authorizeApiWithError()` for JSON responses
+
+## TypeScript Type Safety
+- [ ] **No `any` type**: use proper type, generic, `unknown`, or Zod validation
+- [ ] **No `as SomeType` assertions**: use type guards, `satisfies`, Zod validation, or refactor the source. Casting `undefined as Model` is especially dangerous: the prop type won't reflect nullability and `undefined` will sneak into child components
+- [ ] **No `as unknown as Type` double cast**: always a sign of broken types, fix the root cause
+- [ ] **No non-null assertions (`!`)**: use explicit null checks: `if (value) { value.property }`
+- [ ] **No `ReturnType<typeof fn>`**: use existing schema type or create a dedicated type
+- [ ] **Use `satisfies` for compile-time checks**: `config = { ... } satisfies Config` preserves inference
+- [ ] **Empty object type**: use `Record<string, never>`, not `{}`
+- [ ] **Unknown object (annotation)**: use `Record<string, unknown>`, not `Record<string, any>`
+- [ ] **Extract types from existing definitions**: `Array<Item['id']>` not `Array<number>` when Item.id is number
+- [ ] **Exhaustive switch/union**: all cases handled in discriminated unions, use `satisfies never` for exhaustiveness. Removing the `default` case lets TypeScript warn you when a new variant is added
+- [ ] **Runtime validation for external data**: Zod schemas at API boundaries, never trust raw JSON
+- [ ] **Discriminated unions for polymorphic types**: `getCurrentUser()` return type is example pattern. Use for component variants too: `{ status: 'success', data } | { status: 'error', error }` instead of boolean flags
+- [ ] **Type guards with `is` predicate**: `const isX = (val): val is X => ...` for runtime narrowing
+- [ ] **Generic constraints**: use `<T extends SomeBase>` not bare `<T>`. Name generics with `T` prefix (`TUser`, `TConfig`), never bare `T`, `K`, `V`
+- [ ] **Prefer `Array<T>` syntax**: use `Array<string>` not `string[]` for consistency. Pick one style and be consistent across the file
+- [ ] **Prefer `ReadonlyArray<T>`**: for arrays that should not be mutated
+- [ ] **Explicit return types on exported functions**: all publicly exported functions should have explicit return types. Public members should be self-documenting, especially when return can be `undefined`
+- [ ] **Nullable types reflect reality**: if a value can be `null`/`undefined`, the type must say so. Don't initialize state with `{}` when the type is `DateRange`. Use `useState<DateRange | null>(null)` instead
+- [ ] **Use strict equality `===`**: never `==` for comparisons
+- [ ] **Use `import { FC }` not `React.FC`**: import the type directly
+- [ ] **Use `as const` to derive union types from arrays**: avoids repeating values in both runtime and compile-time definitions. E.g., `const ROLES = ['admin', 'user'] as const; type Role = typeof ROLES[number]`
+- [ ] **IDs should be `string` type**: you never know if the backend uses UUID, ObjectId, or numeric. `string` is the safe universal choice
+- [ ] **Branded/opaque types for domain IDs consistently**: if one entity uses a branded type for its ID (e.g., `TrackerId`), all domain IDs must also use branded types. Don't mix branded IDs with raw `string`
+- [ ] **No `I` prefix on types**: `Repository` not `IRepository`. The `I` prefix is a C#/.NET convention
+- [ ] **No `Type` or `Interface` suffix on type names**: PascalCase already conveys it is a type. `User` not `UserType`. Reserve `Type` suffix for enums only
+- [ ] **Use `Pick<T>` for focused child prop types**: `Pick<ParentProps, 'field1' | 'field2'>` instead of passing all parent props wholesale. Documents the dependency explicitly
+- [ ] **Zod-validate URL search params**: casting `searchParams.get('page')` to string is unsafe. Use Zod to parse query params to an expected schema
+- [ ] **`import type` for type-only imports**: use `import type { Foo }` when the import is used only as a type annotation
+- [ ] **Never suppress without explanation**: `@ts-ignore`, `@ts-expect-error`, `@ts-nocheck`, and `eslint-disable` are forbidden without a concrete justification comment
+- [ ] **Do not widen types with eslint-disable**: `string | any` is just `any`. If eslint flags a type issue, fix the types, don't suppress the warning
+
+## Code Style
+- [ ] **Arrow functions only**: no `function` declarations anywhere
+- [ ] **async/await only**: never `.then()`, `.catch()`, or `.finally()`
+- [ ] **No `console.log`**: use `console.error` for errors only, prefer structured logger
+- [ ] **Named exports only**: no `export default`
+- [ ] **Inline types only**: no standalone `interface` or `type` declarations unless shared across files
+- [ ] **Wrap if statements in braces**: even single-line bodies. Shortened notation leads to misunderstandings
+- [ ] **Early returns over if/else chains**: invert condition, return early, reduce nesting. Also use early returns for loading/error states in components instead of nested ternaries `something ? <loader /> : error ? <error /> : <component />`
+- [ ] **No redundant comments**: code should be self-documenting through naming. Adding comments assumes someone will update both code and comment, and that never works out. TypeScript + IntelliSense are expressive enough
+- [ ] **Immutability (CRITICAL)**: never use `let` (first code smell suggesting mutation). Never use `.push()` (mutates array keeping reference). Use composition: place conditions as ternary when creating objects, not create-then-mutate. `.map()` callbacks must be pure functions (no side effects, no mutating outer scope)
+- [ ] **DRY at 3+ repetitions**: extract helper function when same code appears 3+ times. Also extract shared logic between similar methods
+- [ ] **No test/debug values in production code**: no hardcoded test IDs or temporary values
+- [ ] **Unused code removed**: no commented-out code, unused imports, dead functions. Push clean code always
+- [ ] **No over-engineering**: don't build abstractions that aren't needed yet (YAGNI)
+- [ ] **Single responsibility**: functions should do one thing. If a function converts AND validates, split it. One step at a time: `.map((w) => w.timeSpentSeconds).map(secondsToHours)` is clearer than combining
+- [ ] **Pass only needed values**: if a method needs one field from an object, pass the field, not the full object
+- [ ] **Preserve exception stacktraces**: when wrapping errors, pass the original as cause
+- [ ] **Full names in lambda parameters**: use `result` not `r`, `recipient` not `rec`
+- [ ] **No magic numbers**: extract constants with meaningful names. `const DEFAULT_MONTHS_SPAN = 3` not bare `3`. `const WEEK_DAYS = 7` not bare `7`. Use objects with semantic keys instead of array indexes: `{ billable: "#00C49F" }` not `colors[0]`
+- [ ] **Declarative over imperative**: use `.map()`, `.filter()`, `.reduce()`, spread operators over manual loops
+- [ ] **`map` for transformations, `forEach` for side-effects only**: never use `.map()` when you discard the return value. If you're not mapping to a new value, use `.forEach()`
+- [ ] **Object parameters for functions with 3+ arguments**: use `fn({ page, searchPhrase })` not `fn(page, searchPhrase)`. Named params prevent argument order confusion
+- [ ] **Functions with `and` in the name do too much**: `fetchAndTransform` means the function has two responsibilities. Split it or rename to describe the combined outcome
+- [ ] **Prefer `Map`/object lookup over large `switch`/`if-else` chains**: when a switch grows beyond 3 cases, replace with a `Map` or plain object lookup to reduce cyclomatic complexity
+- [ ] **Use existing library functions**: don't reimplement what libraries provide. E.g., use `date-fns` `secondsToHours()` instead of custom `/ 60 / 60`, use library-exported types like `QueryKey` from react-query instead of defining your own
+- [ ] **Prefer currying for reusable predicates**: `const isBusinessDay = (holidays: Array<string>) => (date: Date) => ...` allows `.filter(isBusinessDay(holidays))` instead of inline arrow functions
+- [ ] **Use `.some()` not `.find()` for boolean checks**: `.find()` returns the item or undefined, `.some()` returns boolean directly
+- [ ] **Use `.flat()` not `.flatMap(x => x)`**: `.flatMap()` is for map+flatten, `.flat()` is for just flattening
+- [ ] **Relative imports only from same directory**: use `./` imports only when importing from the same folder. Use absolute/alias imports (e.g. `@/...`) for everything else
+- [ ] **Pin dependency versions**: never use `latest` or unpinned ranges in `package.json`. Exact versions prevent surprise breakage
+- [ ] **Don't assume data ordering from external sources**: if code depends on array items being in a specific order from an API, validate or sort explicitly. Don't trust the backend will always return items in expected order
+- [ ] **Shorthand property syntax**: `{ a }` not `{ a: a }`
+- [ ] **No redundant wrappers**: no `return` after single expression, no `<></>` fragment wrapping a single child, no unnecessary `else` after early return
+- [ ] **Guard division by zero**: always check divisor before dividing, don't assume data arrays are non-empty
+- [ ] **Guard array index access**: `array[0]` and `array[1]` can be `undefined`. Check existence or use `.at()` with null check
+- [ ] **Understand JS truthiness**: `!![]` is `true` (empty arrays are truthy). `Array.filter` must return boolean, not filtered sub-arrays. Casting via `!!str` behaves differently for whitespace-only strings
+- [ ] **Objects over index-accessed arrays**: if you access by index and need comments to explain what `[0]` and `[1]` mean, use an object with semantic keys instead
+- [ ] **`Promise.all` for independent async operations**: when two async calls don't depend on each other, run them concurrently. Note: `Promise.all` is concurrent (single-threaded event loop), not truly parallel
+- [ ] **`shift()` mutates the original array**: use `array[0]` and `array.slice(1)` instead
+- [ ] **Every TODO must link to a ticket per project convention**: TODOs without a tracker reference get lost. Use your project's tracker format (Jira `ABC-123`, Linear `ENG-456`, GitHub `#789`, etc.) consistently.
+- [ ] **Persistent notes in code, questions in PR comments**: code comments should be lasting notes. Questions about design belong in PR review comments, not committed code
+- [ ] **Feature flags should be simple booleans**: `const featureEnabled = false // TODO: PROJ-123` is enough. Don't overengineer toggle systems for pre-release features
+- [ ] **Validate env vars at startup with Zod**: never use `process.env` directly. Missing vars passed as `undefined` to modules cause hard-to-track runtime errors. Use a centralized `env.ts` with Zod validation
+- [ ] **Sanitize user input before RegExp**: unsanitized input in `new RegExp(userInput)` enables ReDoS attacks
+- [ ] **`.includes()` for path matching is dangerous**: `/search` matches `/foo/bar/search` too. Use `===` for exact match or `.startsWith()` for prefix match
+- [ ] **`filter(Boolean)` drops valid falsy values**: `0`, `""`, `false` are all dropped. If `0` is a valid value in your domain, use explicit predicate instead
+- [ ] **`key={Math.random()}` is worse than index keys**: random keys cause full re-renders on every cycle. React docs explicitly warn against this
+- [ ] **Update single entity in store, not refetch all**: after editing one employee, update that entry in state. Don't re-fetch the entire list. N+1 fetch at the UI level is wasteful
+- [ ] **Use backend response values, not client-side assumptions**: after a mutation, use the value returned by the backend (e.g., `isActive` from response), not client-side negation (`!employee.isActive`). The server is the source of truth
+- [ ] **Barrel files are forbidden**: never create barrel/re-export files
+- [ ] **`index.ts`/`index.tsx`/`index.js`/`index.jsx` are forbidden**: use descriptive filenames instead
+- [ ] **No function calls inside `.reduce()` with spread accumulator**: this is O(n²) and often hides bugs. Use `Map`, `Object.fromEntries`, or a loop instead
+- [ ] **CI/CD file naming consistency**: `deploy.test.yml` + `deploy.prod.yml`, not mixed conventions like `develop.yml` + `prod.yml`
+
+## Naming Precision
+- [ ] **Components: PascalCase**: `UserProfile.tsx`, not `userProfile.tsx`
+- [ ] **Functions: camelCase**: `getUserData`, not `get_user_data`
+- [ ] **Primitive constants: UPPER_SNAKE_CASE**: `API_BASE_URL` for strings, numbers, RegExp only
+- [ ] **Object/map constants: camelCase**: `readableOrderStatus`, `badgeOrderStatusColor`, not `READABLE_ORDER_STATUS`
+- [ ] **Types: PascalCase**: `UserProfile`, `ResponseData`
+- [ ] **Custom hooks: `use*` prefix**: `useAppAction`, `useCurrentUser`, `useDataTable`
+- [ ] **Style files: `Styles.scss`**: consistent naming for style files
+- [ ] **No "handle" prefix on event handlers**: name by action: `submitForm` not `handleSubmit`, `deleteItem` not `handleDelete`
+- [ ] **Callback props use `on{Event}` pattern**: `onDelete`, `onClick`, `onSelect`. If it's a callback for a click, name it `onClick`, not `deleteCallback`
+- [ ] **Method names reflect ALL side effects**: if a method maps, saves, and throws, name it accordingly. A function that saves cache should be named `saveCache`, not `prepareCache`
+- [ ] **Avoid generic names**: `processX` and `prepareX` are not expressive. Use specific verbs: `saveCache`, `calculateChargeability`, `fetchProjectData`
+- [ ] **Domain-qualify all IDs**: `customerId`, `orderId`, not just `id` in contexts with multiple entities
+- [ ] **Acronym casing**: `userId`, `ApiResponse`, NOT `userID`, `APIResponse` (first letter capitalized only)
+- [ ] **No ticket numbers in code names**: `resolveOrderStatus()` not `handlePROJ123Logic()`. Method names should describe behavior, not reference the ticket that created them.
+- [ ] **Boolean naming**: `isValid()` not `checkIfNotValid()`. No "not" in boolean names
+- [ ] **Use `Count` not `Amount` for countable nouns**: `allMembershipsCount` not `allMembershipsAmount` (memberships are countable)
+- [ ] **Consistent naming across codebase**: don't mix `notBillable` and `unBillable`. Pick one convention and stick with it. Type names plural, property names singular
+- [ ] **Update names when behavior changes**: during refactoring, rename methods to match new behavior
+- [ ] **Service naming**: `*Service` for business logic, `*Repository` for DB access
+- [ ] **No snake_case in TS code**: unless required by an external library API
+- [ ] **Variables should not encode their type**: `profiles` not `profilesArray`, `user` not `userObject`. The type system already tells you
+- [ ] **No "my" in service methods**: `getSignedInUserProfile()` not `getMyProfile()`. Services are stateless; "my" implies the service has identity
+- [ ] **Hooks without "get" prefix**: `useLocale()` not `useGetLocale()`. Follows `useParams` convention
+- [ ] **Namespace imports for action modules**: `import * as expertProfileActions from '...'` then `expertProfileActions.getAll()`. Avoids naming conflicts
+- [ ] **Domain language consistency**: don't mix synonyms. If "update" and "actualization" mean the same thing, pick one. If "Profile" and "User" are different concepts, never interchange them
+- [ ] **Sort order as enum with numeric values**: `{ Asc = 1, Desc = -1 }` instead of magic `1` and `-1`

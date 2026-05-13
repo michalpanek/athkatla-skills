@@ -1,0 +1,145 @@
+# Code Quality & Type Safety
+
+Sections: Code Style, Naming Precision, Java Type & Optional Patterns, Validation & Safety, Exception Handling
+
+## Code Style
+- [ ] **Private methods at the bottom** of the class
+- [ ] **No if/else chains**: use early returns instead
+- [ ] **No overengineering**: if a collection has 2-3 items max, use a plain list, not a Map or Set
+- [ ] **YAGNI**: don't build abstractions or optimizations that aren't needed yet
+- [ ] **No redundant comments**: code should be self-explanatory through naming and structure
+- [ ] **Use `var` when type is obvious** from RHS; explicit type when not (e.g. decryption results, complex return types)
+- [ ] **`var` demands extra-precise naming**: since the type is inferred, the variable name must compensate for the missing type hint. In a `for (var x : collection)` loop, `emailData` is self-explanatory while `data` is ambiguous. The parameter should also be named distinctly: `emailsData` (plural) for the list, `emailData` (singular) for the loop variable.
+- [ ] **Use imports** instead of full package paths (e.g. `DataContext.TEST_MODE` not `com.example.common.model.DataContext.TEST_MODE`)
+- [ ] **Unused constructors, fields, and imports removed**
+- [ ] **Blank lines between logical groups** in dense methods: separate variable declarations, setter blocks, and conditional groups for readability
+- [ ] **Extract duplicate overloads**: when multiple overloads have identical bodies, create a shared interface or common method
+- [ ] **DRY at 3+ repetitions**: extract helper method when the same code appears 3+ times
+- [ ] **No test/debug values in production code**: no hardcoded test IDs, test endpoints, or temporary values left behind
+- [ ] **Use `DateTimeFormatter`** for date formatting, not manual string concatenation
+- [ ] **Error flow considered**: if step N fails, does step N+1 correctly handle it? No silent continuation after failures (e.g. SFTP upload fails but order is still marked as sent)
+- [ ] **Scope awareness on shared logic**: when modifying conditions in shared services (OrderService, PaymentService), verify all providers/callers are still correctly handled. A change for one provider must not break another.
+- [ ] **Boolean flags scoped correctly**: if a flag changes behavior for one provider, it must default correctly for all others. Document where the value is determined.
+- [ ] **Semantic mapping accuracy**: verify domain concepts match between source and target (nationality != country of address)
+- [ ] **Time-based logic scrutinized**: token expiration, timezone handling, `plusHours()`/`plusMinutes()` must be thoroughly tested. Off-by-one time errors cause intermittent failures.
+- [ ] **Shared executor logic extracted**: when multiple Order executors share identical logic, it belongs in a common helper, not duplicated
+- [ ] **Pass only needed values**: if a method needs one field from an object, pass the field, not the full object
+- [ ] **Utility vs Service**: stateless transformation logic without dependencies should be static utility methods, not injected `@Service`
+- [ ] **No fixed-count assumptions**: `if (provider == A) ... else ...` assumes only two providers. Use polymorphism (strategy pattern with executor classes).
+- [ ] **No generated/binary files committed**: `.pdf`, `.bat`, build outputs must be in `.gitignore`
+- [ ] **PR titles descriptive**: "WIP" or bare class names are not acceptable. Include ticket number and description.
+- [ ] **Commit messages accurate**: if you move ProviderA files, don't say "Moved ProviderB files"
+- [ ] **Single responsibility**: method named `saveX` must not delete. "and" in method names = consider splitting.
+- [ ] **Same abstraction level**: if method has 3 private method calls + 1 inline stream, extract the inline part too
+- [ ] **Interfaces for types**: `Map` not `HashMap`, `List` not `ArrayList` in parameters and return types
+- [ ] **Boolean naming**: `isValid()` not `checkIfNotValid()`. No "not" in method names.
+- [ ] **`Objects.equals()` for null-safe comparisons**: not manual null checks before `.equals()`
+- [ ] **No reuse of request classes as intermediaries**: create dedicated records for processing steps
+- [ ] **Strategy pattern for provider logic**: each provider gets its own executor class. Only use switch for simple, non-extensible mappings.
+- [ ] **Dead code removed**: unused methods, variables, exceptions, commented-out pom.xml deps, purposeless package-info files
+- [ ] **Entity fields private**: use `@Getter`/`@Setter`, never leave fields package-private by accident
+- [ ] **Use `this.` for class fields in lambdas**: when accessing class fields inside lambdas or inner methods, prefix with `this.` for readability (e.g. `this.orderItems.forEach(...)`)
+- [ ] **Full names in lambda parameters**: use `result` not `r`, `recipient` not `rec`. Lambda parameters should be as readable as regular variables.
+- [ ] **Qualify entity parameter names in `from()` methods**: use `informationEntity` not bare `entity`, `addressEntity` not `entity`. In a domain with multiple entities, the parameter name must clarify which entity it refers to.
+- [ ] **No unused record fields**: if a field is always null or never read, remove it from the record entirely. Don't keep fields "for future use."
+- [ ] **Preserve exception stacktraces**: when wrapping exceptions, pass the original as `cause` (`new CustomException(cause)`), not just the message string. Lost stacktraces make debugging impossible.
+- [ ] **No redundant `@Column`**: JPA auto-converts camelCase to snake_case. Only add when column name differs.
+- [ ] **Files must end with a newline**: configure IDE setting
+- [ ] **No wildcard imports**: `import java.util.*` is not allowed
+- [ ] **Access modifier consistency**: if the project uses `public` on records/classes everywhere, don't switch to package-private for new files. Package-private records used from `public` methods in other classes is invalid (consumers outside the package can't reference the type). Keep access modifiers consistent with the existing codebase.
+- [ ] **Always use braces for if/else blocks**: even single-line bodies
+- [ ] **Avoid boolean method parameters**: use named methods instead (e.g., `notInApp()` instead of `setInApp(false)`)
+- [ ] **Don't extract single-use private methods**: if called exactly once and won't be reused, inline it
+- [ ] **Combine multiple stream operations into a single pass**: avoid iterating the same collection twice for separate filter operations
+- [ ] **Extract guard clause into the method itself**: when all callers repeat the same pre-check, move the guard inside the method
+- [ ] **Skip DB writes when no actual change**: return `Optional.empty()` if state didn't change, callers use `.ifPresent(this::save)`
+- [ ] **Silent fallbacks hide bugs**: when handling "impossible" states, log a warning rather than silently returning a safe default
+- [ ] **Stream `peek()` is for debugging only**: never use `peek()` for production side effects. Use `map()` or `forEach()`
+- [ ] **`orElseGet(Supplier)` for non-trivial fallbacks**: use `orElseGet(() -> ...)` when fallback involves object creation
+- [ ] **Boolean wrapper when null is a distinct state**: use `Boolean` (not `boolean`) when null carries meaning distinct from false
+- [ ] **Optional return completeness**: methods returning `Optional` must return `Optional.empty()` for all negative paths
+- [ ] **Verify all related fields on entity update**: when updating one field, check if related fields also need updating
+- [ ] **Prefer primitive types** (`int`, `long`) over wrappers (`Integer`, `Long`) when nullability is not needed
+- [ ] **Enum comparison uses `==`** not `.equals()`
+- [ ] **Prefer imperative over overly-chained functional code**: readability and debuggability matter more than cleverness
+- [ ] **Declare variables close to first use**: not at the top of the method before a try block
+- [ ] **Extract complex lambdas to named private methods**: for readability and debuggability when things go wrong
+- [ ] **No unnecessary casting**: don't cast to a type when the expression already returns it
+- [ ] **Remove `@Builder` if builder pattern is never used** in that class
+- [ ] **Don't shadow stdlib classes**: don't define your own `Date` when `java.time.LocalDate` suffices
+- [ ] **Remove default annotation attributes**: `required = true` is the default for `@RequestParam`, don't write it
+- [ ] **`EnumMap<Provider, Executor>` for O(1) routing**: use `EnumMap` for provider-to-executor dispatch, not if/else chains or HashMap
+- [ ] **Batch processing with named constant**: use `private static final int BATCH_SIZE = 500` for large deletion/processing loops, not inline magic numbers
+- [ ] **Vavr `Try<T>` for async error handling**: use `.onSuccess()` / `.onFailure()` for deferred error processing in CompletableFuture contexts
+- [ ] **MDC propagation in async**: use `MDCTaskDecorator` on `ThreadPoolTaskExecutor` and `SupplierMDC` wrapper for `CompletableFuture.supplyAsync()`
+
+## Naming Precision
+- [ ] **Method names reflect ALL side effects**: if a method maps, saves, and throws, name it `handleErrorResponse` not `mapToErrorResponse`. Hidden side effects are bugs waiting to happen.
+- [ ] **Variable names are consistent across processing stages**: `corePayload` -> `providerPayload` -> `providerResponse`. Never reuse a name from an earlier stage for a later transformation.
+- [ ] **MDC utility methods use consistent naming**: `addXToLogs` / `removeXFromLogs` pattern for all MDC context methods.
+- [ ] **Notification/UI field naming**: prefix with an application-specific identifier only for internal values. External values should not carry application prefixes.
+- [ ] **No generic names**: prefer `deletionThresholdDate` over `cutoffDate`, `errorOccurrenceCount` over `requestsCount`.
+- [ ] **Method name matches the method's scope**: `findBranchesForOrder` that also sets values is misleading. Name should include both actions or extract the mutation.
+- [ ] **No ticket numbers in method/class names**: `handleOrderRequest()` not `handlePROJ123Order()`. Method names should describe behavior, not reference the ticket that created them.
+- [ ] **Class naming matches official casing**: follow the canonical brand/product casing as it is officially written
+- [ ] **No numeric suffixes**: `fetchContactIfExists()` not `fetchIfExistOrNull2()`
+- [ ] **Domain-qualify all UUIDs**: `clientUuid`, `carUuid`, `requestUuid` not just `uuid`
+- [ ] **DTO suffix is `Dto` (camelCase)** not `DTO` (all caps)
+- [ ] **Boolean getters use `is*` prefix**: `isInHouse()` not `getInHouse()`
+- [ ] **HTTP method name must match verb**: `@PatchMapping` cannot be named `getApprovals()`
+- [ ] **Update method names when behavior changes** during refactoring
+- [ ] **Consistent domain terminology**: use `from+until` consistently, not sometimes `from+to`
+- [ ] **RabbitMQ queue names follow dot-separated convention**: `create.service-request` not dashes
+- [ ] **Service naming convention**: `*Service` for business logic, `*PersistenceService` for DB access, `*Executor` for provider-specific request handlers
+- [ ] **Domain prefix consistency**: all classes dedicated to a domain share its prefix. E.g. order domain: `OrderData`, `OrderExecutor`, `OrderPersistenceService`. A class operating within a domain must carry the domain prefix.
+- [ ] **Record names describe what they ARE, not what they're used in**: `OrderEmailData` (data for the email process) not `OrderEmailRecipient` (implies a person receiving something). If the name doesn't match the contents, rename it.
+- [ ] **Class names must not collide with programming terms**: `OldRecordExpirySet` suggests a collection; use `OldRecordExpiryKnown`. Avoid suffixes like `Set`, `List`, `Map` unless the class IS that data structure.
+- [ ] **Class responsibility clear from name**: value objects (`Money`), converters (`MoneyConverter`), and utilities (`MoneyUtils`) must be distinguishable. If reviewers ask "is this a util or a value object?", the name is wrong.
+- [ ] **String construction consistency**: before adding new `firstName + " " + lastName` logic, check existing implementations. Multiple strategies for the same concept create bugs.
+
+## Java Type & Optional Patterns
+- [ ] **Optional is a return type only**: do NOT wrap objects in Optional just to call `.ifPresent()`. Use plain null checks: `if (obj != null)` is clearer than `Optional.ofNullable(obj).ifPresent(...)`
+- [ ] **Never call `Optional.get()`**: use `.orElseThrow()`, `.map()`, `.flatMap()`, `.orElse()`
+- [ ] **`orElseThrow` pattern**: `.orElseThrow(() -> NotFoundException.byMessage("key", "Not found: %s", uuid))`
+- [ ] **Static factory methods preferred**: use `from()`, `of()`, `updateWith()` on entities/DTOs over inline construction
+- [ ] **Varargs for variable arguments**: `Object... args` instead of multiple overloads
+- [ ] **Return direct types**: don't wrap in `Supplier<>` if callers always call `.get()` immediately
+- [ ] **Chain builders in return statements**: avoid unnecessary local variables when method only constructs and returns
+- [ ] **Method references in streams**: prefer `ClassName::method` over lambda wrappers
+- [ ] **Use Guava utilities**: `Lists.partition()` for chunking, `Streams.zip()` for zipping
+- [ ] **Regex for string cleanup**: `.replaceAll("[,\\s]", "")` not manual character removal
+- [ ] **Simplify boolean returns**: `return !document.isEncrypted()` not `if` block
+- [ ] **Use `@Data` + `@Accessors(chain=true)` for mutable test objects**: `@Builder` for immutable
+- [ ] **Services never return Optional**: either return direct type or throw domain exception. Empty collections preferred over Optional for batch results.
+
+## Validation & Safety
+- [ ] **Collection boundaries validated**: when a request contains a `List`, verify behavior when empty. Use `@NotEmpty` if at least one element is required.
+- [ ] **`@Valid` vs `@Validated` used correctly**: `@Valid` on method parameters, `@Validated` on controller classes. Don't stack multiple `@Validated` annotations.
+- [ ] **No return null without explanation**: if a method returns null, document why or redesign to use Optional
+- [ ] **Iterator safety**: never call `.next()` without checking `hasNext()` or using `findFirst()` with `Optional`, especially on SOAP/REST error response iterators that may be empty
+- [ ] **`@NotNull` on message/DTO fields** where null would break processing
+- [ ] **Distinguish null from empty**: handle null set and empty set as distinct states explicitly
+- [ ] **Guard clauses first**: return null/empty early rather than at end; skip unnecessary steps
+- [ ] **Don't repeat DB query conditions in application code**: if the query already filters, trust it
+- [ ] **Input normalization at earliest point**: normalize emails to lowercase in DTO/registration step
+- [ ] **Validate new password differs from old** in password change flows
+- [ ] **Custom validators consolidate annotations**: use `@PhoneNumber(required, min, max, maxLength)` instead of stacking `@NotBlank + @Size + @Pattern`. Make validators configurable with annotation parameters.
+- [ ] **Validation results are collections, not exceptions**: business validation failures return as `List<ValidationResult>`, not thrown. Empty = passed, non-empty = failed. Services create empty responses for failed validations.
+
+## Exception Handling
+- [ ] **Simplified exception classes**: don't keep unused constructors or dead fields
+- [ ] **Exceptions extend the project's hierarchy** (e.g. `DomainException` with `ErrorCode`)
+- [ ] **No exception throwing from controllers**: all handled via `@ControllerAdvice`
+- [ ] **Be cautious with provider error response parsing**: some provider responses have empty detail entries. Always handle empty/missing data gracefully.
+- [ ] **Use `NotFoundException.byKey("domain.notfound", args)`**: not `IllegalArgumentException` with raw strings. i18n keys must match entity domain (`car.notfound` not `client.notfound`)
+- [ ] **Use `BadRequestException.byKey`** for constraint violations
+- [ ] **Log before throwing**: log a meaningful error message before throwing for a business rule violation
+- [ ] **Don't catch-and-rethrow unchanged**: it looks weird and adds nothing
+- [ ] **Don't declare unchecked exceptions** that are never thrown (`throws IOException` when no IO happens)
+- [ ] **Consolidate catch blocks** that do the same thing: three identical catches are unnecessary
+- [ ] **Default branch for unknown enum values**: always add else/default that logs a warning for future enum additions
+- [ ] **Know the exception hierarchy**: `InvalidDataException extends RuntimeException` won't be caught by `catch (Exception)`
+- [ ] **Simplify exception chains**: throw->catch->wrap->unwrap->rethrow should become a single failure representation
+- [ ] **`ErrorCode` enum has code, message, and HttpStatus**: new error codes must have all three fields, unique numeric code, and match the failure source semantically
+- [ ] **`ErrorResponse` record includes `requestId`**: always via `MDCUtils.getRequestId()` for request traceability
+- [ ] **`handleHttpMessageNotReadable`**: check for `InvalidFormatException` cause to provide field-specific error messages, not generic "unreadable"

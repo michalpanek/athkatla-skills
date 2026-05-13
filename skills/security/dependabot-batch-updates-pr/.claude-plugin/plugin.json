@@ -1,0 +1,8 @@
+{
+  "name": "dependabot-batch-updates-pr",
+  "version": "0.1.0",
+  "description": "Triage and batch-process Dependabot updates on a GitHub repo: open Dependabot PRs plus vulnerability alerts that have no PR. Filters by severity. Cherry-picks open PRs as clean linear commits on a dedicated branch. Manual invocation only.",
+  "author": "michalpanek",
+  "license": "MIT",
+  "homepage": "https://github.com/michalpanek/athkatla-skills"
+}

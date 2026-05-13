@@ -1,0 +1,9 @@
+# --workflows input — one path glob per line.
+# Patterns are matched against the file path (relative to scan roots), with a
+# leading "*/" prepended automatically. Use shell-style wildcards: *, ?, [..].
+# Typical attack patterns target .github/workflows/ entries.
+
+.github/workflows/discussion.yaml
+.github/workflows/discussion.yml
+.github/workflows/formatter_*.yml
+.github/workflows/formatter_*.yaml
