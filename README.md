@@ -20,6 +20,7 @@ Personal collection of Claude Code agent skills — code review, security, produ
 | `supply-chain-scan` | Generic npm supply-chain scanner — user-supplied advisory lists |
 | `docs` | Documentation conventions (skeletal, auto-trigger) |
 | `productivity` | Non-code workflows (skeletal, auto-trigger) |
+| `ux-audit` | Systemic UX/UI audit for Next.js apps — route mapping + principles-based audit (auto-trigger) |
 
 All manual-invocation skills use `disable-model-invocation: true`. Code-review skills detect the project's stack in Step 0 and apply only relevant rules.
 
@@ -66,6 +67,10 @@ Common pitfalls:
 - `name` fields are **kebab-case** (lowercase + digits + hyphens only)
 - Plugin `source` relative paths must start with `./` and cannot use `..`
 - Setting `version` in both `plugin.json` and the marketplace entry silently uses `plugin.json` — pick one
+
+## Credits
+
+Thanks to [@abankowski](https://github.com/abankowski) for the `ux-audit` skills (`ux-site-mapper` + `ux-ui-auditor`) — created with his help.
 
 ## License
 

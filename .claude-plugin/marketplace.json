@@ -5,7 +5,7 @@
   },
   "metadata": {
     "description": "Personal collection of agent skills. Code review, productivity, security, and more. Model agnostic.",
-    "version": "0.1.0"
+    "version": "0.2.0"
   },
   "plugins": [
     {
@@ -63,6 +63,14 @@
       "version": "0.1.0",
       "category": "productivity",
       "tags": ["productivity", "drafting", "summarizing", "triage"]
+    },
+    {
+      "name": "ux-audit",
+      "source": "./skills/ux/audit",
+      "description": "Systemic UX/UI audit for Next.js apps. ux-site-mapper maps route structure (app/ + pages/ router, layouts, flows, link graph, optional Chrome screenshots) then hands off to ux-ui-auditor, which scores findings against a bundled 7-category principles reference with High/Medium/Low/Info severity. Auto-triggers when relevant.",
+      "version": "0.1.0",
+      "category": "ux",
+      "tags": ["ux", "ui", "audit", "nextjs", "design", "accessibility"]
     }
   ]
 }

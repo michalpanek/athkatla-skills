@@ -1,0 +1,10 @@
+{
+  "name": "ux-audit",
+  "version": "0.1.0",
+  "description": "Systemic UX/UI audit for Next.js apps. ux-site-mapper maps the route structure (app/ + pages/ router, layouts, flows, link graph, optional Chrome screenshots) then hands off to ux-ui-auditor, which scores findings against a bundled 7-category principles reference (consistency, flow, entry points, control matrix, color usage, color coding, information structure) with High/Medium/Low/Info severity. Auto-triggers when relevant.",
+  "author": {
+    "name": "michalpanek"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/michalpanek/athkatla-skills"
+}
