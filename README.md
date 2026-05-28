@@ -21,6 +21,7 @@ Personal collection of Claude Code agent skills — code review, security, produ
 | `docs` | Documentation conventions (skeletal, auto-trigger) |
 | `productivity` | Non-code workflows (skeletal, auto-trigger) |
 | `ux-audit` | Systemic UX/UI audit for Next.js apps — route mapping + principles-based audit (auto-trigger) |
+| `optimize-agent-md` | Audit + split a monolithic `CLAUDE.md` / `AGENTS.md` / `GEMINI.md` into a router + per-area rule files |
 
 All manual-invocation skills use `disable-model-invocation: true`. Code-review skills detect the project's stack in Step 0 and apply only relevant rules.
 

@@ -5,7 +5,7 @@
   },
   "metadata": {
     "description": "Personal collection of agent skills. Code review, productivity, security, and more. Model agnostic.",
-    "version": "0.2.0"
+    "version": "0.3.0"
   },
   "plugins": [
     {
@@ -63,6 +63,14 @@
       "version": "0.1.0",
       "category": "productivity",
       "tags": ["productivity", "drafting", "summarizing", "triage"]
+    },
+    {
+      "name": "optimize-agent-md",
+      "source": "./skills/meta/optimize-agent-md",
+      "description": "Audit and split a monolithic CLAUDE.md or AGENTS.md (or GEMINI.md) into a router + per-area rule files under .claude/rules/ or .agents/rules/. Detects stale or copy-pasted rules that do not match the current repo and drops them before splitting. Manual invocation only.",
+      "version": "0.1.0",
+      "category": "meta",
+      "tags": ["meta", "claude-md", "agents-md", "rules", "router", "config"]
     },
     {
       "name": "ux-audit",

@@ -1,0 +1,10 @@
+{
+  "name": "optimize-agent-md",
+  "version": "0.1.0",
+  "description": "Audit and split a monolithic CLAUDE.md or AGENTS.md into a router + per-area rule files under .claude/rules/ or .agents/rules/. Detects stale or copy-pasted rules that do not match the current repo (libraries not installed, paths that do not exist, wrong tooling) and drops them before splitting. Manual invocation only.",
+  "author": {
+    "name": "michalpanek"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/michalpanek/athkatla-skills"
+}
