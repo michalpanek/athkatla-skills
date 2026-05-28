@@ -15,6 +15,7 @@ Personal collection of Claude Code agent skills — code review, security, produ
 |---|---|
 | `ts-review` | Opinionated TypeScript / JavaScript code review (single-agent + multi-agent) |
 | `java-review` | Opinionated Java Spring Boot code review (single-agent + multi-agent) |
+| `clean-code` | Language-agnostic clean-code standards for any TS / JS project — declarative style, DRY, readonly immutability, SOLID, naming, error handling (auto-trigger) |
 | `dependabot-review` | Per-PR risk analysis for open Dependabot PRs (skeletal) |
 | `dependabot-batch-updates-pr` | Batch + alert triage workflow for any GitHub repo with Dependabot |
 | `supply-chain-scan` | Generic npm supply-chain scanner — user-supplied advisory lists |

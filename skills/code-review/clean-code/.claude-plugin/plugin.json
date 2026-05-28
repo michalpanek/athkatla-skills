@@ -1,0 +1,10 @@
+{
+  "name": "clean-code",
+  "version": "0.1.0",
+  "description": "Language-agnostic clean-code standards for TypeScript / JavaScript. Enforces declarative/functional style, early returns, DRY de-duplication across files, readonly immutability types, intention-revealing names, SOLID, and deliberate error handling — with a severity rubric for review. Auto-triggers while writing, refactoring, or reviewing code.",
+  "author": {
+    "name": "michalpanek"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/michalpanek/athkatla-skills"
+}
