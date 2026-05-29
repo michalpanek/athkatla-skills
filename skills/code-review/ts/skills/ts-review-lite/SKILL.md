@@ -115,6 +115,13 @@ Print the stack summary once at the top of the report. Skip checklist items whos
 - Realistic data; reuse fixtures over re-inventing.
 - No shared mutable state across tests; use per-test fixtures.
 
+### 7. Structural & Maintainability (diff-level)
+
+- Prefer the reframing that deletes branches / helpers / layers over one that just rearranges them. A refactor that relocates complexity without cutting concept-count is not a win.
+- A diff pushing a file from under ~1000 lines to over it is a decomposition smell — extract first.
+- No new ad-hoc `if` / flag bolted onto an unrelated existing flow; push it behind a helper, dispatch table, or state model.
+- No thin wrappers / pass-through helpers / generic "magic" that adds indirection without clarity. Direct, boring code wins.
+
 ## Severity Mapping
 
 | Severity | What counts |
@@ -164,3 +171,6 @@ Do NOT post inline PR comments from this skill — that is the CI workflow's job
 | `useEffect(() => { window.addEventListener(...) }, [])` | return cleanup function |
 | `handleSubmit` | `submitForm` |
 | missing DB-access wrapper in a repository function | wrap the DB call |
+| PR pushes a file past ~1000 lines | decompose first — extract modules / components / helpers |
+| special-case `if` bolted onto an unrelated flow | move behind a helper / dispatch table / state model |
+| thin wrapper / pass-through helper adding no clarity | inline it; keep the direct flow |

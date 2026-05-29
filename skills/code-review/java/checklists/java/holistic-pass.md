@@ -16,6 +16,20 @@ Report spec deviations tagged `[Spec]` alongside standards findings. A diff that
 
 If no spec artifact exists, note that explicitly and flag the missing spec as a process issue (LOW) — review then reduces to the standards axis only.
 
+## Structural & Maintainability (be ambitious)
+
+Read the diff for its effect on the structure of the surrounding code, not only local correctness. Prefer the reframing that **deletes** complexity over the one that merely rearranges it. (The line-by-line checklist already covers strategy / executor dispatch, fixed-count assumptions, and silent fallbacks as items; here, judge the change *as a whole*.)
+
+- **Reframe to delete, don't just tidy**: when a change adds branches, helper methods, flags, or layers, ask whether the feature can be restructured so some of them vanish entirely. A refactor that relocates complexity but leaves the reader holding the same number of moving parts is not a win.
+- **File / class-growth is a review signal**: a diff that pushes a class from well under ~1000 lines to over it (tune to the repo's norms) is a presumptive decomposition smell. Extract collaborators, split responsibilities, or introduce a focused helper first; waive only with a clear structural reason and a still-well-organized result.
+- **No spaghetti growth (diff-level)**: a new special-case branch or boolean wedged into an unrelated shared flow (a shared `Service`, a common executor) is a design problem, not a nit — even when the line-item strategy / `EnumMap` rules pass. Push it behind a dedicated abstraction or state model rather than tangling the existing path.
+- **Abstractions must earn their keep**: flag thin wrappers, identity / pass-through helpers, and generic "magic" mechanisms that hide a simple, concrete data shape behind indirection without buying clarity. Prefer direct, boring code — extract on real, repeated need, not to abstract for its own sake.
+
+## Review Posture
+
+- **The bar is higher than "it works."** Behaviour being correct or tests passing does not earn approval on its own. A clear structural regression, an unjustified file-size explosion, fresh spaghetti branching, or an obvious missed simplification is a blocker, not a polish note.
+- **Lead with conviction, not volume.** Surface a small number of high-confidence structural findings rather than a long list of cosmetic nits. Rough priority: structural / architecture regressions and missed simplifications first, then boundary / type-contract problems, then file-size / decomposition, then local style. The line-item checklist already covers nits — don't let cosmetics bury the structural signal.
+
 ### How to Run This Review
 
 1. Read the changed files
@@ -71,6 +85,12 @@ Focus on cross-cutting concerns that checklist-scoped agents miss:
 7. **Test coverage gaps** (high bar — project does not optimize for coverage): Only flag when a **behavioral change** (new branching, new validation rule, new error path, changed business logic) has no corresponding test. Do NOT flag missing tests for pure mapping / field-copy / nullable-column / record-field-passthrough changes — manual verification is the accepted default. Symmetrically, if the PR **adds** a low-signal test (trivial `from()` round-trip, getter/setter, framework-plumbing verification), flag it for removal under the Tests checklist.
 
 8. **Spec fidelity** (Spec axis): every acceptance criterion / requirement in the originating spec, PRD, plan, ADR, or ticket (Jira, Linear, GitHub Issues, or any other tracker) maps to a concrete change in the diff. Flag with `[Spec]` tag: silent drops, partial implementations, scope creep, edge cases ignored, default values diverging from spec wording, error codes / validation messages diverging from spec, missing tests for acceptance criteria.
+
+9. **Structural simplification — be ambitious** (this is your highest-value axis): for each meaningful change, ask whether a reframing would make whole branches, helper methods, flags, or layers disappear, not merely a tidier version of the same shape. Flag: a diff that pushes a class past a healthy size (~1000 lines) instead of decomposing; a special-case branch or boolean wedged into an unrelated shared flow (shared service, common executor); thin wrappers, pass-through helpers, or generic "magic" that adds indirection without clarity; a refactor that relocates complexity without reducing the concepts a reader must hold.
+
+## Posture & Prioritisation
+
+The bar is higher than "it works" — correct behaviour and passing tests do not earn approval on their own. A clear structural regression, an unjustified file-size explosion, fresh spaghetti branching, or an obvious missed simplification is a blocker. Lead with a small number of high-conviction structural findings; the scoped agents already cover line-item nits, so do not pad your report with cosmetics. Priority order: structural regressions and missed simplifications → boundary / type-contract problems → file-size / decomposition → local style.
 
 ## Severity Guidelines
 

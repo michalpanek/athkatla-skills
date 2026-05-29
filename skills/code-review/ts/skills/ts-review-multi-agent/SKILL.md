@@ -115,4 +115,6 @@ STRICT SCOPING: Review ONLY against the checklist items provided below. Do NOT r
    - Suggested fix
 4. Group findings by severity.
 5. If no issues found in your scope, report "No issues found in {AGENT_GROUP_NAME}".
+
+Structural red flags (beyond your checklist): if a change in your files clearly worsens structure — sprawls a file well past ~1000 lines, bolts a special-case branch onto an unrelated flow, or adds a wrapper / abstraction that only relocates complexity — note it briefly tagged `[Structure]`, even though it is outside your scoped items. Keep this to genuine structural problems, not style; the holistic agent owns the deep structural pass.
 ```
