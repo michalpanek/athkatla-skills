@@ -1,6 +1,6 @@
 ---
 name: optimize-agent-md
-description: Use ONLY when the user explicitly invokes this skill (e.g. /optimize-agent-md, "optimize my CLAUDE.md", "optimize my AGENTS.md", "audit and split AGENTS.md / CLAUDE.md", "split my agent rules"). Audits a monolithic root agent-config file (CLAUDE.md, AGENTS.md, GEMINI.md, or equivalent), detects stale or copy-pasted rules that do not match the current project, splits content by area (overall, code, project config, review) into per-agent rule files (.claude/rules/ for Claude, .agents/rules/ for Codex / OpenAI / generic, .gemini/rules/ for Gemini), and rewrites the root file as an on-demand router. Do NOT auto-invoke.
+description: Use ONLY when the user explicitly invokes this skill (e.g. /optimize-agent-md, "optimize my CLAUDE.md", "optimize my AGENTS.md", "audit and split AGENTS.md / CLAUDE.md", "split my agent rules", "convert my rules into skills", "make my rules auto-discoverable", "promote rules to skills"). Audits a monolithic root agent-config file (CLAUDE.md, AGENTS.md, GEMINI.md, or equivalent), detects stale or copy-pasted rules that do not match the current project, splits content by area into per-agent rule files (.claude/rules/, .agents/rules/, .gemini/rules/), rewrites the root file as an on-demand router, and (Claude Code only) can optionally promote rule files into discoverable .claude/skills/<name>/SKILL.md skills. Do NOT auto-invoke.
 disable-model-invocation: true
 ---
 
@@ -12,6 +12,8 @@ Audit, slim, and split a project's root agent-config file (`CLAUDE.md`, `AGENTS.
 
 Works across agent ecosystems. Auto-detects the agent flavor from filenames and rewrites the right tree (`.claude/rules/`, `.agents/rules/`, `.gemini/rules/`).
 
+For Claude Code repos there is an optional further step: promote rule files into **skills** (`.claude/skills/<name>/SKILL.md`) so the guidance activates itself by task relevance and is `/name`-invocable, instead of depending on the agent remembering to read a router link. See "Optionally promote rules to skills" below. This is the more impactful evolution when a repo has fat, topic-shaped rule files.
+
 **Core principle:** wrong rules are worse than no rules. Hallucinated constraints (libraries that are not installed, paths that do not exist) waste tokens and produce broken suggestions. Verify every claim against the current repo before keeping it.
 
 ## When to use
@@ -21,6 +23,8 @@ Works across agent ecosystems. Auto-detects the agent flavor from filenames and 
   - "Audit / split / refactor my agent config file"
   - "Reorganize `.claude/rules/`" / "`.agents/rules/`"
   - "Make my agent config a router"
+  - "Convert my rules into skills" / "promote rules to skills" / "make my rules auto-discoverable" (Claude Code)
+  - "Revive / fix my dormant skills" (flat `.claude/skills/*.md` files that never trigger)
 - A repo has a single huge root config (>200 lines) that loads on every turn.
 - Rules in the root file or `*/rules/` reference libraries, paths, or workflows that the user has confirmed are wrong.
 
@@ -196,6 +200,81 @@ In your final message to the user, list:
 
 User should be able to `git diff` and understand every change.
 
+## Optionally promote rules to skills (Claude Code only)
+
+After (or instead of) the router split, offer to promote rule files into **skills**. A rule file in `.claude/rules/` only activates when something tells the agent to read it (the router link, or the agent guessing). A skill's `name` + `description` sit in the system prompt, so the model pulls the body in by task relevance on its own, and the user can run it as `/name`. For topic-shaped, detail-heavy rules that is a real upgrade; for tiny always-on rules it is not (see hybrid, below).
+
+**Scope guard — Claude Code only.** Skill auto-discovery is a Claude Code feature. Do this only when `RULES_DIR` is `.claude/rules/`. For `.agents/` (Codex) and `.gemini/` (Gemini), stop at the router unless you have confirmed that ecosystem auto-discovers skills the same way; otherwise promoting rules makes them dormant. When unsure, keep the rules and say so.
+
+### Decision per rule file
+
+```dot
+digraph promote {
+    "Rule file" [shape=box];
+    "Redundant with a loaded MCP server's\ninstructions or an existing skill?" [shape=diamond];
+    "Must apply to EVERY task of its kind?\n(code conventions, security baseline)" [shape=diamond];
+    "Drop it (ask user first)" [shape=box];
+    "Hybrid: slim critical subset stays in\nrules/, full detail becomes a skill" [shape=box];
+    "Full skill: move all detail to\n.claude/skills/<name>/SKILL.md" [shape=box];
+
+    "Rule file" -> "Redundant with a loaded MCP server's\ninstructions or an existing skill?";
+    "Redundant with a loaded MCP server's\ninstructions or an existing skill?" -> "Drop it (ask user first)" [label="yes"];
+    "Redundant with a loaded MCP server's\ninstructions or an existing skill?" -> "Must apply to EVERY task of its kind?\n(code conventions, security baseline)" [label="no"];
+    "Must apply to EVERY task of its kind?\n(code conventions, security baseline)" -> "Hybrid: slim critical subset stays in\nrules/, full detail becomes a skill" [label="yes"];
+    "Must apply to EVERY task of its kind?\n(code conventions, security baseline)" -> "Full skill: move all detail to\n.claude/skills/<name>/SKILL.md" [label="no, phase-scoped"];
+}
+```
+
+**Size gate first.** A rule file already short enough to carry no real detail (rough cut: under ~30 lines, phase-scoped) gains nothing from promotion — a skill wrapper just adds a discovery hop. Leave it as a rule. Promote only files whose detail is worth auto-triggering.
+
+**Two forks are the user's call, not yours — ask via one batched question:**
+- For each always-on discipline rule: **hybrid** vs **full skill**. Default recommend hybrid. If hybrid, also ask where the critical subset lives (usually a slimmed `rules/<x>.md`, not back in the root file).
+- For each redundant rule: **drop** vs **keep as a thin skill**. Default recommend drop.
+
+### The rules that govern the conversion
+
+1. **Discovery format is non-negotiable.** Claude Code discovers a project skill ONLY as a directory: `.claude/skills/<name>/SKILL.md`. A flat `.claude/skills/<name>.md` is **dormant** — never listed, never auto-triggers, not `/name`-invocable. Always emit the directory form.
+
+2. **Migrate existing flat skill files.** Before writing anything, scan `.claude/skills/` for flat `*.md` files. Each is a dormant skill. Revive it: `mkdir -p .claude/skills/<name> && git mv .claude/skills/<name>.md .claude/skills/<name>/SKILL.md` (plain `mv` if untracked). The frontmatter is usually already valid; fix the description per rule 5 if not. This is independent of any rules work — a repo with dormant flats is worth fixing on its own.
+
+3. **Verify discovery live, same session.** After writing a `SKILL.md`, it appears in the available-skills list immediately — no restart. That is your GREEN check: confirm the new skill is listed. A flat file never appears; that is the negative control proving the dir form was required.
+
+4. **Hybrid for always-on disciplines.** A rule that must hold on EVERY task of its kind (code conventions, security baseline) must NOT be fully skillified — if the skill fails to fire, the rule is silently skipped, which is worse than a rule that is always loaded. Keep a short critical subset in `rules/<x>.md` (stays effectively always-on via the router) and move the full detail into the skill. Phase-scoped rules (build/test commands, the review checklist) are safe to fully skillify — they only matter during that phase, so relevance-triggering is correct.
+
+   ```
+   .claude/rules/code.md          # slimmed: ~20-40 lines, the non-negotiables only
+   .claude/skills/code-conventions/SKILL.md   # full detail, triggers when writing/refactoring code
+   ```
+
+5. **Description = trigger, not workflow.** Per skill-authoring conventions, the `description` is third person, starts with "Use when…", lists concrete triggering conditions/symptoms, and NEVER summarizes the skill's process. If the repo's existing skills carry a `triggers:` list in frontmatter, generate that too, to match house style. Bad: "Use when reviewing — checks naming then types then tests." Good: "Use when writing or refactoring TypeScript/React in this repo, before committing code."
+
+6. **Name-collision check.** Skill names share one flat namespace with plugin skills and slash commands. Before naming a skill, check for collisions (other `.claude/skills/`, installed plugin skills, `/` commands). Rename to a non-colliding, still-descriptive name — e.g. a review rule cannot become `code-review` if a `code-review` plugin / `/review` exists; use `review-checklist`.
+
+7. **Check git tracking before claiming sharing impact.** Run `git ls-files .claude/` (or inspect `.gitignore`). If `.claude/` is gitignored, the whole tree is local-only — converting rules to skills loses no team sharing because none existed; say that. If `.claude/` IS tracked, flag that the new skills, like the old rules, will be committed and shared with the team. State the real implication for this repo; do not assume.
+
+8. **Rewire the router.** After conversion the root file must point at the skills, not the deleted rule files, and the intro should say detail now lives in auto-triggering / `/name`-invocable skills (plus the slim hybrid subset in `rules/`). Sweep the repo for stale references to any deleted rule path and fix or flag them. Ignore dated artifacts (old plans/specs) that merely mention the old paths historically.
+
+### Skill body shape (when promoting)
+
+Keep the moved content; do not rewrite the rules. Wrap them in the standard skeleton:
+
+```markdown
+---
+name: <kebab-name>
+description: Use when <concrete triggers/symptoms — no workflow summary>
+triggers:        # only if the repo's other skills use this field
+  - <symptom 1>
+  - <symptom 2>
+---
+
+# <Name>
+
+## When to use
+<bullets of triggering situations>
+
+<the rule content, moved verbatim from the rule file>
+```
+
 ## Audit checklist (use this when scanning rules)
 
 For each rule, ask:
@@ -252,6 +331,12 @@ Copy and adapt (substitute `RULES_DIR`):
 - **Hyphens / em-dashes in user-facing output if the project bans them.** Check root file for style rules before writing the final summary message.
 - **Mixing agent trees.** Do not split into both `.claude/rules/` and `.agents/rules/` in one run. Pick one target per invocation.
 - **Renaming working filenames.** If existing tree uses `claude.md` / `agents.md`, keep it. Do not churn names just to match the generic `overall.md` convention.
+- **Writing a flat skill file.** `.claude/skills/<name>.md` is dormant — never discovered. Always the directory form `.claude/skills/<name>/SKILL.md`. Same trap when migrating: must `mkdir` the dir, not leave the `.md` at the skills root.
+- **Skipping the flat-file sweep.** A repo can already contain dormant flat skills. Detect and migrate them even if the user only asked about rules.
+- **Fully skillifying an always-on rule.** If the skill does not fire, the rule is silently skipped. Use the hybrid pattern (slim subset in `rules/`, full detail in skill) for anything that must hold on every task.
+- **Absorbing a redundant rule instead of dropping it.** A rule that just restates a loaded MCP server's instructions or an existing skill should be deleted, not moved into another file. Moving it keeps the duplication.
+- **Promoting rules to skills outside Claude Code.** Skill auto-discovery is Claude-specific. For `.agents/` / `.gemini/`, promotion can make rules dormant. Stay at the router unless you confirmed that ecosystem discovers skills.
+- **Description that summarizes the workflow.** The model then follows the description and skips the body. Description = triggers only.
 
 ## Deliverable shape
 
@@ -259,7 +344,9 @@ Final user message must contain:
 1. File inventory before / after with line counts.
 2. Table of what was dropped + evidence.
 3. Table of what was added or reworded.
-4. Suggested next step: `git diff <ROOT_FILE> <RULES_DIR>` for review.
+4. If rules were promoted to skills: the skills created (dir form), any flat files migrated, which rules went hybrid vs full vs dropped, and the live-discovery confirmation (each new skill now appears in the skills list).
+5. The git-tracking finding and its real sharing implication for this repo.
+6. Suggested next step: `git diff <ROOT_FILE> <RULES_DIR> .claude/skills/` for review.
 
 ## Manual-only invocation
 
