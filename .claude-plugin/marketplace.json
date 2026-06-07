@@ -5,7 +5,7 @@
   },
   "metadata": {
     "description": "Personal collection of agent skills. Code review, productivity, security, and more. Model agnostic.",
-    "version": "0.4.0"
+    "version": "0.4.1"
   },
   "plugins": [
     {
