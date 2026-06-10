@@ -1,7 +1,7 @@
 {
   "name": "optimize-agent-md",
-  "version": "0.1.1",
-  "description": "Audit and split a monolithic CLAUDE.md or AGENTS.md into a router + per-area rule files under .claude/rules/ or .agents/rules/. Detects stale or copy-pasted rules that do not match the current repo (libraries not installed, paths that do not exist, wrong tooling) and drops them before splitting. For Claude Code, optionally promotes rule files into discoverable .claude/skills/<name>/SKILL.md skills (hybrid for always-on disciplines, drop redundant ones) and migrates dormant flat skill files. Manual invocation only.",
+  "version": "0.2.0",
+  "description": "Audit and split a monolithic CLAUDE.md or AGENTS.md into a router + small per-subject files. Detects stale or copy-pasted rules that do not match the current repo (libraries not installed, paths that do not exist, wrong tooling) and drops them before splitting. In Claude Code the user chooses per subject: rule file (.claude/rules/) or auto-discoverable skill (.claude/skills/<name>/SKILL.md), mixable. Rewrites the root file as an on-demand router. Manual invocation only.",
   "author": {
     "name": "michalpanek"
   },

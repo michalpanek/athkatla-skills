@@ -1,0 +1,10 @@
+{
+  "name": "promote-rules-to-skills",
+  "version": "0.1.0",
+  "description": "Promote project rule files (.claude/rules/*.md) into auto-discoverable Claude Code skills (.claude/skills/<name>/SKILL.md). Hybrid pattern for always-on disciplines (slim subset stays in rules, full detail becomes a skill), drops redundant rules, migrates dormant flat skill files, verifies live discovery, and rewires the root router. Claude Code only. Manual invocation only.",
+  "author": {
+    "name": "michalpanek"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/michalpanek/athkatla-skills"
+}
