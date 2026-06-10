@@ -1,7 +1,7 @@
 {
   "name": "ts-review",
-  "version": "0.1.1",
-  "description": "Opinionated TypeScript / JavaScript code review skills. Auto-detects stack (Next.js, React, Drizzle, next-safe-action, Zod, Tailwind, Vitest, etc.) and applies only rules for tools in use. Includes full single-agent (/ts-review), lite single-pass (/ts-review-lite, ~80 model turns), and 5-parallel-subagent (/ts-review-multi-agent) variants. Manual invocation only.",
+  "version": "0.2.0",
+  "description": "Opinionated TypeScript / JavaScript code review skills. Auto-detects stack (Next.js, React, Drizzle, next-safe-action, Zod, Tailwind, Vitest, etc.) and applies only rules for tools in use. Includes full single-agent (/ts-review), lite single-pass (/ts-review-lite, ~80 model turns), and 6-parallel-subagent (/ts-review-multi-agent, incl. a clean-code lens agent) variants. Manual invocation only.",
   "author": {
     "name": "michalpanek"
   },
