@@ -5,22 +5,22 @@
   },
   "metadata": {
     "description": "Personal collection of agent skills. Code review, productivity, security, and more. Model agnostic.",
-    "version": "0.4.2"
+    "version": "0.5.0"
   },
   "plugins": [
     {
       "name": "ts-review",
       "source": "./skills/code-review/ts",
-      "description": "Opinionated TypeScript / JavaScript code review skills. Auto-detects stack (Next.js, React, Drizzle, next-safe-action, Zod, Tailwind, Vitest, etc.) and applies only rules for tools in use. Three variants: full single-agent (/ts-review), lite single-pass (/ts-review-lite, ~80 model turns), and 5-parallel-subagent (/ts-review-multi-agent). Manual invocation only.",
-      "version": "0.1.1",
+      "description": "Opinionated TypeScript / JavaScript code review skills. Auto-detects stack (Next.js, React, Drizzle, next-safe-action, Zod, Tailwind, Vitest, etc.) and applies only rules for tools in use. Three variants: full single-agent (/ts-review), lite single-pass (/ts-review-lite, ~80 model turns), and 6-parallel-subagent (/ts-review-multi-agent, incl. a clean-code lens agent). Manual invocation only.",
+      "version": "0.2.0",
       "category": "code-review",
       "tags": ["code-review", "typescript", "javascript", "react", "nextjs", "pr-review"]
     },
     {
       "name": "java-review",
       "source": "./skills/code-review/java",
-      "description": "Opinionated Java code review skills (Spring Boot-focused). Auto-detects stack (Spring Boot starters, JPA, Lombok, Vavr, Resilience4j, Spock, RabbitMQ, etc.) and applies only rules for tools in use. Single-agent (/java-review) and 5-parallel-subagent (/java-review-multi-agent) variants. Manual invocation only.",
-      "version": "0.1.0",
+      "description": "Opinionated Java code review skills (Spring Boot-focused). Auto-detects stack (Spring Boot starters, JPA, Lombok, Vavr, Resilience4j, Spock, RabbitMQ, etc.) and applies only rules for tools in use. Single-agent (/java-review) and 6-parallel-subagent (/java-review-multi-agent, incl. a clean-code lens agent) variants. Manual invocation only.",
+      "version": "0.2.0",
       "category": "code-review",
       "tags": ["code-review", "java", "spring-boot", "jpa", "pr-review"]
     },
@@ -75,10 +75,18 @@
     {
       "name": "optimize-agent-md",
       "source": "./skills/meta/optimize-agent-md",
-      "description": "Audit and split a monolithic CLAUDE.md or AGENTS.md (or GEMINI.md) into a router + per-area rule files under .claude/rules/ or .agents/rules/. Detects stale or copy-pasted rules that do not match the current repo and drops them before splitting. For Claude Code, optionally promotes rule files into discoverable .claude/skills/<name>/SKILL.md skills (hybrid for always-on disciplines, drop redundant ones) and migrates dormant flat skill files. Manual invocation only.",
-      "version": "0.1.1",
+      "description": "Audit and split a monolithic CLAUDE.md or AGENTS.md (or GEMINI.md) into a router + small per-subject files. Detects stale or copy-pasted rules that do not match the current repo and drops them before splitting. In Claude Code the user chooses per subject: rule file (.claude/rules/) or auto-discoverable skill (.claude/skills/<name>/SKILL.md), mixable. Rewrites the root file as an on-demand router. Manual invocation only.",
+      "version": "0.2.0",
       "category": "meta",
-      "tags": ["meta", "claude-md", "agents-md", "rules", "router", "config", "skills", "discovery"]
+      "tags": ["meta", "claude-md", "agents-md", "rules", "router", "config", "skills"]
+    },
+    {
+      "name": "promote-rules-to-skills",
+      "source": "./skills/meta/promote-rules-to-skills",
+      "description": "Promote project rule files (.claude/rules/*.md) into auto-discoverable Claude Code skills (.claude/skills/<name>/SKILL.md). Hybrid pattern for always-on disciplines, drops redundant rules, migrates dormant flat skill files, verifies live discovery, rewires the root router. Claude Code only. Manual invocation only.",
+      "version": "0.1.0",
+      "category": "meta",
+      "tags": ["meta", "skills", "rules", "discovery", "claude-code"]
     },
     {
       "name": "ux-audit",
