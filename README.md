@@ -21,6 +21,7 @@ Personal collection of Claude Code agent skills — code review, security, produ
 | `supply-chain-scan` | Generic npm supply-chain scanner — user-supplied advisory lists |
 | `docs` | Documentation conventions (skeletal, auto-trigger) |
 | `productivity` | Non-code workflows (skeletal, auto-trigger) |
+| `spade-it` | Facilitate a full S.P.A.D.E. decision session (Setting, People, Alternatives, Decide, Explain) for hard contested decisions |
 | `ux-audit` | Systemic UX/UI audit for Next.js apps — route mapping + principles-based audit (auto-trigger) |
 | `optimize-agent-md` | Audit + split a monolithic `CLAUDE.md` / `AGENTS.md` / `GEMINI.md` into a router + per-area rule files |
 

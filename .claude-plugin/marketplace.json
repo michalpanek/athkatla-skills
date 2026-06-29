@@ -66,11 +66,19 @@
     },
     {
       "name": "productivity",
-      "source": "./skills/productivity",
+      "source": "./skills/productivity/productivity",
       "description": "General non-code productivity: drafting, summarizing, triaging, planning. Auto-triggers when relevant.",
       "version": "0.1.0",
       "category": "productivity",
       "tags": ["productivity", "drafting", "summarizing", "triage"]
+    },
+    {
+      "name": "spade-it",
+      "source": "./skills/productivity/spade-it",
+      "description": "Facilitate a full S.P.A.D.E. decision session (Setting, People, Alternatives, Decide, Explain). Interactive, one phase at a time, for hard contested decisions where ownership and follow-through matter. Pushes on vague answers and produces a complete SPADE document. Manual invocation only.",
+      "version": "0.1.0",
+      "category": "productivity",
+      "tags": ["productivity", "decision-making", "spade", "facilitation"]
     },
     {
       "name": "optimize-agent-md",
