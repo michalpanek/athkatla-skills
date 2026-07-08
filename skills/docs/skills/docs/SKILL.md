@@ -1,8 +1,7 @@
 ---
 name: docs
-description: Enforce documentation conventions across the repository. Covers README structure, code-block language tags, heading hierarchy, link health, image alt-text, ADR format, and changelog discipline. Apply when writing or editing any documentation file, when a PR adds or modifies docs, or when the user asks for documentation review.
-when_to_use: Auto-apply when the user is editing or creating `.md` / `.mdx` / `README*` / `CHANGELOG*` / `docs/**` files, or asks "review my docs", "check the README", "is this documentation clear". Apply silently — don't announce unless flagging an issue.
-paths: ["*.md", "*.mdx", "README*", "CHANGELOG*", "docs/**"]
+description: Documentation conventions (README structure, headings, code-block tags, links, ADRs, changelog). Draft, not yet complete.
+disable-model-invocation: true
 ---
 
 # Documentation Conventions

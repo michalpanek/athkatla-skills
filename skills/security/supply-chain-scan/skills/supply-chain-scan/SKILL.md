@@ -39,16 +39,16 @@ The scanner takes flag-based inputs. At minimum, supply `--packages`.
 
 ```bash
 # Local file
-${CLAUDE_SKILL_DIR}/scan.sh --packages path/to/affected.txt
+${CLAUDE_PLUGIN_ROOT}/skills/supply-chain-scan/scan.sh --packages path/to/affected.txt
 
 # URL (fetched via curl or wget)
-${CLAUDE_SKILL_DIR}/scan.sh --packages https://example.org/affected.txt
+${CLAUDE_PLUGIN_ROOT}/skills/supply-chain-scan/scan.sh --packages https://example.org/affected.txt
 
 # Stdin
-cat affected.txt | ${CLAUDE_SKILL_DIR}/scan.sh --packages -
+cat affected.txt | ${CLAUDE_PLUGIN_ROOT}/skills/supply-chain-scan/scan.sh --packages -
 
 # Combine multiple advisory inputs
-${CLAUDE_SKILL_DIR}/scan.sh \
+${CLAUDE_PLUGIN_ROOT}/skills/supply-chain-scan/scan.sh \
   --packages https://example.org/affected.txt \
   --iocs    https://example.org/ioc-filenames.txt \
   --workflows path/to/workflow-patterns.txt \

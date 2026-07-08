@@ -1,13 +1,11 @@
 ---
 name: ux-site-mapper
 description: >
-  Maps a Next.js application's route structure into a site map, then triggers the ux-ui-auditor
-  skill to run a UX audit against that map. Use when the user wants to audit an entire
-  Next.js app (not a single component), asks to "audit the whole site", "map and audit",
-  "find UX issues across the app", or provides a Next.js codebase path and wants
-  a systemic UX review. This skill orchestrates: (1) discovery questions, (2) site mapping,
-  (3) screenshot capture via Chrome MCP if chosen, (4) handoff to ux-ui-auditor for
-  per-route findings and a cross-cutting summary.
+  Maps a Next.js application's route structure into a site map, then hands off to the
+  ux-ui-auditor skill for a systemic UX audit against that map. Use when the user wants to
+  audit an entire Next.js app (not a single component) — "audit the whole site", "map and
+  audit", "find UX issues across the app" — or provides a Next.js codebase path for a
+  systemic UX review.
 ---
 
 # UX Site Mapper Skill

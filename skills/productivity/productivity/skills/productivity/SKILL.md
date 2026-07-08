@@ -1,7 +1,7 @@
 ---
 name: productivity
-description: General non-code productivity workflows. Drafts emails, summarizes long threads, triages issue backlogs, batches similar tasks, schedules follow-ups, generates checklists from meeting notes, and turns rough notes into shareable artifacts.
-when_to_use: Auto-apply when the user is doing non-code work — drafting messages, summarizing meetings, organizing tasks, writing status updates, planning week — and asks for help structuring or accelerating it. Skip if the task is clearly engineering work (code, debugging, review) — let dedicated skills handle those.
+description: Non-code productivity workflows (drafting, summarizing, triage, planning). Draft, not yet complete.
+disable-model-invocation: true
 ---
 
 # Productivity Workflows

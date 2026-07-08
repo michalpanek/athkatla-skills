@@ -27,7 +27,7 @@
     {
       "name": "clean-code",
       "source": "./skills/code-review/clean-code",
-      "description": "Language-agnostic clean-code standards for any TypeScript / JavaScript project. Enforces declarative/functional style, early returns, DRY de-duplication across files (near-identical siblings, structural repetition), readonly immutability types, intention-revealing names, SOLID, and deliberate error handling. Includes a severity rubric (CRITICAL/HIGH/MEDIUM/LOW) for review. Auto-triggers while writing, refactoring, or reviewing code.",
+      "description": "Opinionated clean-code standards for TypeScript / JavaScript. Enforces declarative/functional style, early returns, DRY de-duplication across files (near-identical siblings, structural repetition), readonly immutability types, intention-revealing names, SOLID, and deliberate error handling. Includes a severity rubric (CRITICAL/HIGH/MEDIUM/LOW) for review. Auto-triggers while writing, refactoring, or reviewing code.",
       "version": "0.1.0",
       "category": "code-review",
       "tags": ["code-review", "clean-code", "typescript", "javascript", "refactoring", "solid"]
@@ -35,7 +35,7 @@
     {
       "name": "dependabot-review",
       "source": "./skills/security/dependabot-review",
-      "description": "Review one or more open Dependabot PRs for security and breaking-change impact. Returns per-PR risk verdict and suggested merge order. Manual invocation only.",
+      "description": "Review one or more open Dependabot PRs for security and breaking-change impact: per-PR risk verdict and suggested merge order. Draft skeleton, not yet complete. Manual invocation only.",
       "version": "0.1.0",
       "category": "security",
       "tags": ["security", "dependabot", "dependencies", "pr-review"]
@@ -59,7 +59,7 @@
     {
       "name": "docs",
       "source": "./skills/docs",
-      "description": "Enforce documentation conventions: README structure, heading hierarchy, code-block language tags, link health, ADR format, changelog discipline. Auto-triggers on doc edits.",
+      "description": "Documentation conventions: README structure, heading hierarchy, code-block language tags, link health, ADR format, changelog discipline. Draft, manual invocation only (not yet complete).",
       "version": "0.1.0",
       "category": "docs",
       "tags": ["docs", "documentation", "readme", "adr", "markdown"]
@@ -67,7 +67,7 @@
     {
       "name": "productivity",
       "source": "./skills/productivity/productivity",
-      "description": "General non-code productivity: drafting, summarizing, triaging, planning. Auto-triggers when relevant.",
+      "description": "General non-code productivity: drafting, summarizing, triaging, planning. Draft, manual invocation only (not yet complete).",
       "version": "0.1.0",
       "category": "productivity",
       "tags": ["productivity", "drafting", "summarizing", "triage"]

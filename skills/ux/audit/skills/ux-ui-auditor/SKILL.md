@@ -1,14 +1,12 @@
 ---
 name: ux-ui-auditor
 description: >
-  Perform a structured UX/UI audit on frontend code (HTML, JSX, TSX, CSS) and optionally
-  live screenshots. Produces a markdown report grouped by category with High / Medium / Low / Info
-  severity ratings. Focus areas: UI consistency, user flow & navigation, action entry points,
-  button/control matrix on lists, color usage, color coding, and information structure.
-  Use this skill whenever the user asks to audit, review, or critique a UI, mentions issues
-  like "inconsistent design", "broken flow", "confusing buttons", "bad colors", or provides
-  frontend code for design feedback. Also trigger when the user says "audit my UI",
-  "review this component", "what's wrong with this design", or uploads/pastes JSX, TSX, or HTML.
+  Perform a structured UX/UI audit on frontend code (HTML, JSX, TSX, CSS) and optionally live
+  screenshots. Produces a markdown report grouped by category (UI consistency, user flow &
+  navigation, action entry points, button/control matrix on lists, color usage & coding,
+  information structure) with High / Medium / Low / Info severity. Use when the user asks to
+  audit, review, or critique a UI, reports symptoms like "inconsistent design" / "broken flow" /
+  "confusing buttons" / "bad colors", or pastes JSX / TSX / HTML for design feedback.
 ---
 
 # UX/UI Auditor Skill

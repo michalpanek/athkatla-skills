@@ -11,6 +11,8 @@ description: Use when writing or refactoring code, before PR review, or when rev
 
 Describe *what* you want, not *how* to get there. Reduce cognitive load for the next reader (including your future self). Functions should do one thing, names should reveal intent, and error handling should be deliberate.
 
+> Scope: TypeScript / JavaScript. Examples and the readonly-types section (Part Ia) are TS-specific. For Java, use the `java-review` skill.
+
 ## Core Principles (Priority Order)
 
 1. **Declarative over imperative.** Prefer `filter`, `map`, `reduce` over `for` loops that mutate state.
@@ -20,52 +22,6 @@ Describe *what* you want, not *how* to get there. Reduce cognitive load for the 
 5. **Readable over clever.** If two approaches perform similarly, pick the one a junior dev understands without explanation.
 6. **One thing per function.** Single Responsibility. <20 lines ideal.
 7. **Intention-revealing names.** No `data`, `temp`, `result`, `handle`.
-
-## When to Use
-
-```dot
-digraph clean_code_check {
-    "Writing/reviewing code?" [shape=diamond];
-    "Imperative loop with mutation?" [shape=diamond];
-    "Function >20 lines?" [shape=diamond];
-    "Unclear names?" [shape=diamond];
-    "Nested conditions?" [shape=diamond];
-    "Error handling?" [shape=diamond];
-    "Apply clean code" [shape=box, style=filled];
-    "Continue" [shape=box];
-
-    "Writing/reviewing code?" -> "Imperative loop with mutation?" [label="yes"];
-    "Imperative loop with mutation?" -> "Apply clean code" [label="yes"];
-    "Imperative loop with mutation?" -> "Function >20 lines?" [label="no"];
-    "Function >20 lines?" -> "Apply clean code" [label="yes"];
-    "Function >20 lines?" -> "Unclear names?" [label="no"];
-    "Unclear names?" -> "Apply clean code" [label="yes"];
-    "Unclear names?" -> "Nested conditions?" [label="no"];
-    "Nested conditions?" -> "Apply clean code" [label=">2 levels"];
-    "Nested conditions?" -> "Error handling?" [label="ok"];
-    "Error handling?" -> "Apply clean code" [label="issues"];
-    "Error handling?" -> "Continue" [label="ok"];
-}
-```
-
-**Trigger symptoms:**
-- `for` loops mutating accumulator variables
-- Nested `if` blocks for happy-path logic
-- Functions longer than 20-30 lines
-- Names like `data`, `list`, `process`, `handler`, `x`, `temp`
-- Try/catch blocks with just `console.log(e)`
-- Conditions nested 3+ levels deep
-- Methods with 5+ parameters
-- Comments explaining WHAT code does (instead of WHY)
-- Function signatures with `T[]`, `Array<T>`, `Map<K, V>`, `Set<T>` where the function only reads
-- In-place mutations: `arr.sort()`, `arr.push()`, `obj.field = ...`, `Object.assign(target, ...)`
-- Object/array literals exposed without `Readonly<>` or `as const`
-- Two files/functions that are near-identical and differ only by a name or a single constant
-- A block copy-pasted across 2+ files, or repeated 3+ times within one file
-- A field triad/group (`fieldA`/`fieldB`/`fieldC`) handled by hand-written parallel statements instead of mapping over a key table
-- Code you cannot understand without first scrolling to read another part
-- Names that describe mechanism (`loadJsonAsync`, `doStuff`, `processData`) instead of intent (`loadCountryOptions`)
-- A function/variable whose purpose is not obvious from its name alone
 
 ---
 
