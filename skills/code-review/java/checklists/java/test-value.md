@@ -1,6 +1,6 @@
 # Test Value
 
-Apply this gate to every net-new test file, new `@Test` method, and new Spock feature method in the change. Run it before any test style or structure item.
+Apply this gate to every net-new test file, new `@Test` method, new Spock feature method, and new assertion in an existing test. Run it before any test style or structure item. When you write tests, run it on each test you plan, before you write it: the default is no test.
 
 ## The gate
 
@@ -10,6 +10,20 @@ For each new test, name the business rule of this change that goes red when the 
 - No rule, or a rule that only matters during this one change: flag **MEDIUM — propose removal**. Stop grading that test. Suggest where the effort belongs instead: the feature's own behaviour.
 
 Project stance: coverage for its own sake is not a goal. A test earns its place by catching a concrete, recurring failure mode of the code under change: business logic, branching, validation rules, integration seams.
+
+## Drop-on-sight scan
+
+Ask these in order for each new test or assertion. The first YES fails the gate: drop it, and stop grading it.
+
+1. **Removed concept**: the test names a symbol that the change deleted. It tests nothing and misleads the next reader. (PR #775: `shouldReturnEmptyMapWhenCardifPayloadCarriesNoBankData` after the bank field left the model.)
+2. **Compiler-guaranteed**: the code would not compile if the assertion were false. Examples: a deleted field is absent, an enum constant exists, a record carries a field. (PR #775: `.bankAccount` `doesNotHaveJsonPath()`.)
+3. **Framework-guaranteed**: Jackson, Hibernate, Lombok, Spring, or the shared global config owns the behaviour. See "Framework configuration" below.
+4. **Already asserted**: a full-object `equalTo(expected)` in the same test, or an existing integration test, already covers the fact. (PR #775: a `personBankingReferenceAccount` assert next to the full `equalTo(expectedRequest)`.)
+5. **Scaffold**: the test only protects the act of making this change ("I might forget to wire this field"). It is done at GREEN. Remove it.
+
+A retired, renamed, or added payload field is where items 1 and 3 fire most often. Put the effort into the working form (see "Keep" below).
+
+TDD means: write no code that a test would have prevented. It does not mean a test at every step. Recommend no test when the honest answer is none. Say "verify manually" out loud, and do not offer a menu of cheaper options.
 
 ## Low-signal tests (propose removal)
 
@@ -61,9 +75,9 @@ void shouldReturnSavedProTectInformationForBothInsuredPersons() throws Exception
   // then
   savedForm
       .andExpect(status().isOk())
-      .andExpect(jsonPath(proTectPath(FIRST_INSURED_PERSON) + ".occupation", is("WORKER")))
-      .andExpect(jsonPath(proTectPath(SECOND_INSURED_PERSON) + ".unemploymentCoveragePeriod").value(nullValue()))
-      .andExpect(jsonPath(coveragePath(SECOND_INSURED_PERSON) + ".unemployment").value(nullValue()));
+      .andExpect(jsonPath(buildProTectPath(FIRST_INSURED_PERSON) + ".occupation", is("WORKER")))
+      .andExpect(jsonPath(buildProTectPath(SECOND_INSURED_PERSON) + ".unemploymentCoveragePeriod").value(nullValue()))
+      .andExpect(jsonPath(buildCoveragePath(SECOND_INSURED_PERSON) + ".unemployment").value(nullValue()));
       // ... plus the remaining per-person protocol and coverage assertions
 }
 ```
