@@ -6,24 +6,27 @@ Personal collection of Claude Code agent skills — code review, security, produ
 
 ```
 /plugin marketplace add michalpanek/athkatla-skills
-/plugin install <plugin-name>@athkatla-skills
+/plugin install athkatla-skills@athkatla-skills
 ```
 
-## Plugins
+One plugin ships every skill. Invoke a skill as `/athkatla-skills:<skill-name>`, for example `/athkatla-skills:java-review-multi-agent`.
 
-| Plugin | Purpose |
-|---|---|
-| `ts-review` | Opinionated TypeScript / JavaScript code review (single-agent + multi-agent) |
-| `java-review` | Opinionated Java Spring Boot code review (single-agent + multi-agent) |
-| `clean-code` | Language-agnostic clean-code standards for any TS / JS project — declarative style, DRY, readonly immutability, SOLID, naming, error handling (auto-trigger) |
-| `dependabot-review` | Per-PR risk analysis for open Dependabot PRs (skeletal) |
-| `dependabot-batch-updates-pr` | Batch + alert triage workflow for any GitHub repo with Dependabot |
-| `supply-chain-scan` | Generic npm supply-chain scanner — user-supplied advisory lists |
-| `docs` | Documentation conventions (skeletal, auto-trigger) |
-| `productivity` | Non-code workflows (skeletal, auto-trigger) |
-| `spade-it` | Facilitate a full S.P.A.D.E. decision session (Setting, People, Alternatives, Decide, Explain) for hard contested decisions |
-| `ux-audit` | Systemic UX/UI audit for Next.js apps — route mapping + principles-based audit (auto-trigger) |
-| `optimize-agent-md` | Audit + split a monolithic `CLAUDE.md` / `AGENTS.md` / `GEMINI.md` into a router + per-area rule files |
+## Skills
+
+| Area | Skills | Purpose |
+|---|---|---|
+| Code review | `ts-review`, `ts-review-lite`, `ts-review-multi-agent` | Opinionated TypeScript / JavaScript code review (single-agent, lite, multi-agent) |
+| Code review | `java-review`, `java-review-multi-agent` | Opinionated Java Spring Boot code review (single-agent + multi-agent) |
+| Code review | `clean-code` | Clean-code standards for TS / JS: declarative style, DRY, readonly immutability, SOLID, naming, error handling (auto-trigger) |
+| Security | `dependabot-review` | Per-PR risk analysis for open Dependabot PRs (skeletal) |
+| Security | `dependabot-batch-updates-pr` | Batch + alert triage workflow for any GitHub repo with Dependabot |
+| Security | `supply-chain-scan` | Generic npm supply-chain scanner with user-supplied advisory lists |
+| Docs | `docs` | Documentation conventions (skeletal) |
+| Productivity | `productivity` | Non-code workflows (skeletal) |
+| Productivity | `spade-it` | Facilitate a full S.P.A.D.E. decision session for hard contested decisions |
+| UX | `ux-site-mapper`, `ux-ui-auditor` | Systemic UX/UI audit for Next.js apps: route mapping + principles-based audit (auto-trigger) |
+| Meta | `optimize-agent-md` | Audit + split a monolithic `CLAUDE.md` / `AGENTS.md` / `GEMINI.md` into a router + per-area files |
+| Meta | `promote-rules-to-skills` | Promote `.claude/rules/*.md` into auto-discoverable skills |
 
 All manual-invocation skills use `disable-model-invocation: true`. Code-review skills detect the project's stack in Step 0 and apply only relevant rules.
 

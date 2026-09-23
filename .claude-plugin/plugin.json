@@ -1,0 +1,25 @@
+{
+  "name": "athkatla-skills",
+  "version": "0.8.0",
+  "description": "Personal collection of agent skills in one plugin: code review (TS, Java, clean-code), security (Dependabot, supply chain), productivity (SPADE), docs, meta (agent-md optimization), and UX audit. Invoke as /athkatla-skills:<skill-name>.",
+  "author": {
+    "name": "michalpanek"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/michalpanek/athkatla-skills",
+  "keywords": ["code-review", "typescript", "java", "spring-boot", "clean-code", "security", "dependabot", "supply-chain", "productivity", "docs", "meta", "ux"],
+  "skills": [
+    "./skills/code-review/ts/skills/",
+    "./skills/code-review/java/skills/",
+    "./skills/code-review/clean-code/skills/",
+    "./skills/security/dependabot-review/skills/",
+    "./skills/security/dependabot-batch-updates-pr/skills/",
+    "./skills/security/supply-chain-scan/skills/",
+    "./skills/docs/skills/",
+    "./skills/productivity/productivity/skills/",
+    "./skills/productivity/spade-it/skills/",
+    "./skills/meta/optimize-agent-md/skills/",
+    "./skills/meta/promote-rules-to-skills/skills/",
+    "./skills/ux/audit/skills/"
+  ]
+}
