@@ -18,6 +18,7 @@
     "./skills/docs/skills/",
     "./skills/productivity/productivity/skills/",
     "./skills/productivity/spade-it/skills/",
+    "./skills/productivity/show-me/skills/",
     "./skills/meta/optimize-agent-md/skills/",
     "./skills/meta/promote-rules-to-skills/skills/",
     "./skills/ux/audit/skills/"

@@ -24,6 +24,7 @@ One plugin ships every skill. Invoke a skill as `/athkatla-skills:<skill-name>`,
 | Docs | `docs` | Documentation conventions (skeletal) |
 | Productivity | `productivity` | Non-code workflows (skeletal) |
 | Productivity | `spade-it` | Facilitate a full S.P.A.D.E. decision session for hard contested decisions |
+| Productivity | `show-me` | Show the current topic visually and re-pitch it in simple English, grounded in the ticket |
 | UX | `ux-site-mapper`, `ux-ui-auditor` | Systemic UX/UI audit for Next.js apps: route mapping + principles-based audit (auto-trigger) |
 | Meta | `optimize-agent-md` | Audit + split a monolithic `CLAUDE.md` / `AGENTS.md` / `GEMINI.md` into a router + per-area files |
 | Meta | `promote-rules-to-skills` | Promote `.claude/rules/*.md` into auto-discoverable skills |
