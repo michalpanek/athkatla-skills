@@ -1,11 +1,10 @@
 ---
 name: ux-ui-auditor
 description: >
-  Perform a structured UX/UI audit on frontend code (HTML, JSX, TSX, CSS) and optionally live
-  screenshots. Produces a markdown report grouped by category (UI consistency, user flow &
-  navigation, action entry points, button/control matrix on lists, color usage & coding,
-  information structure) with High / Medium / Low / Info severity. Use when the user asks to
-  audit, review, or critique a UI, reports symptoms like "inconsistent design" / "broken flow" /
+  Audits frontend code (HTML, JSX, TSX, CSS) and optionally live screenshots for UX/UI issues —
+  consistency, flow and navigation, entry points, button matrices, color, and information
+  structure — and produces a markdown report with High/Medium/Low/Info severity. Use when the
+  user asks to audit, review, or critique a UI, reports "inconsistent design" / "broken flow" /
   "confusing buttons" / "bad colors", or pastes JSX / TSX / HTML for design feedback.
 ---
 
@@ -21,8 +20,8 @@ visual inconsistency, broken flow, buried entry points, button matrix antipatter
 arbitrary color use, and flat information hierarchy.
 
 The principles used as reference are distilled from a curated UX/UI design book
-library and bundled with this skill. Read them from `references/principles.md`
-(relative to this skill's directory) before running any audit.
+library and bundled with this skill as `references/principles.md` (relative to
+this skill's directory) — read in Step 2, before running any audit.
 
 ---
 
@@ -92,7 +91,7 @@ Analyze the input against all 7 categories. For each finding, determine:
 ## Step 4 — Write the Report
 
 Output a markdown report using the structure below.
-Do NOT output a flat bullet list. Group by category, severity-sorted within each category.
+Group findings by category, severity-sorted within each category — never as a flat bullet list.
 
 ```markdown
 # UX/UI Audit Report

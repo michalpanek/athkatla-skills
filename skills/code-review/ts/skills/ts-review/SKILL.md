@@ -1,7 +1,6 @@
 ---
 name: ts-review
-description: Opinionated TypeScript / JavaScript code review. Auto-detects the project's stack (Next.js, React, Drizzle, next-safe-action, Zod, Tailwind, Vitest, etc.) and applies ONLY rules for tools actually in use. Works for single-repo or monorepo. Single agent walks every applicable section sequentially.
-when_to_use: User explicitly invokes /ts-review. Do NOT auto-apply on edits, file saves, or generic "review my code" requests — this skill is opt-in only.
+description: Opinionated TypeScript / JavaScript code review. Detects the project's stack and applies only the rules that fit. Single agent walks every checklist section sequentially.
 argument-hint: "[optional: file path or diff range, e.g. HEAD~3..HEAD]"
 disable-model-invocation: true
 ---

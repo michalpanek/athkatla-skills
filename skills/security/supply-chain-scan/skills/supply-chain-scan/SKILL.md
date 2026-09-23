@@ -1,7 +1,6 @@
 ---
 name: supply-chain-scan
 description: Detection-only scanner for npm supply-chain compromise. Searches the workstation for installed packages, lockfile pins, IOC filenames, rogue GitHub workflow files, and suspicious lifecycle scripts that match user-provided lists. All scan inputs (affected `package@version` list, IOC filenames, workflow patterns, lifecycle keywords) are supplied by the user via file path, URL, or stdin. No bundled campaign lists. Reports findings; never modifies, quarantines, or deletes anything.
-when_to_use: User explicitly invokes /supply-chain-scan. Triggers include "scan for supply-chain attack", "check workstation against advisory", "is this compromise on my machine", "audit npm packages against IOC list". Do NOT auto-apply on file edits or generic dependency questions.
 argument-hint: "--packages <PATH|URL|-> [--iocs <PATH|URL|->] [--workflows <PATH|URL|->] [--lifecycle <PATH|URL|->]"
 disable-model-invocation: true
 ---
@@ -39,16 +38,16 @@ The scanner takes flag-based inputs. At minimum, supply `--packages`.
 
 ```bash
 # Local file
-${CLAUDE_PLUGIN_ROOT}/skills/supply-chain-scan/scan.sh --packages path/to/affected.txt
+${CLAUDE_PLUGIN_ROOT}/skills/security/supply-chain-scan/skills/supply-chain-scan/scan.sh --packages path/to/affected.txt
 
 # URL (fetched via curl or wget)
-${CLAUDE_PLUGIN_ROOT}/skills/supply-chain-scan/scan.sh --packages https://example.org/affected.txt
+${CLAUDE_PLUGIN_ROOT}/skills/security/supply-chain-scan/skills/supply-chain-scan/scan.sh --packages https://example.org/affected.txt
 
 # Stdin
-cat affected.txt | ${CLAUDE_PLUGIN_ROOT}/skills/supply-chain-scan/scan.sh --packages -
+cat affected.txt | ${CLAUDE_PLUGIN_ROOT}/skills/security/supply-chain-scan/skills/supply-chain-scan/scan.sh --packages -
 
 # Combine multiple advisory inputs
-${CLAUDE_PLUGIN_ROOT}/skills/supply-chain-scan/scan.sh \
+${CLAUDE_PLUGIN_ROOT}/skills/security/supply-chain-scan/skills/supply-chain-scan/scan.sh \
   --packages https://example.org/affected.txt \
   --iocs    https://example.org/ioc-filenames.txt \
   --workflows path/to/workflow-patterns.txt \
@@ -58,8 +57,8 @@ ${CLAUDE_PLUGIN_ROOT}/skills/supply-chain-scan/scan.sh \
 Slash command (recommended inside Claude Code sessions):
 
 ```
-/supply-chain-scan --packages https://example.org/affected.txt
-/supply-chain-scan --packages affected.txt --iocs ioc-files.txt
+/athkatla-skills:supply-chain-scan --packages https://example.org/affected.txt
+/athkatla-skills:supply-chain-scan --packages affected.txt --iocs ioc-files.txt
 ```
 
 ## Inputs

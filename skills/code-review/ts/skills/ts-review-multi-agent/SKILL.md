@@ -1,14 +1,13 @@
 ---
 name: ts-review-multi-agent
-description: Opinionated TypeScript / JavaScript code review using 6 parallel subagents. Auto-detects the project's stack (Next.js, React, Drizzle, next-safe-action, Zod, Tailwind, Vitest, etc.) and applies ONLY rules for tools actually in use. Works for single-repo or monorepo. Use for large PRs spanning multiple domains.
-when_to_use: User explicitly invokes /ts-review-multi-agent. Do NOT auto-apply on edits or generic "review my code" requests — this skill is opt-in only.
+description: Opinionated TypeScript / JavaScript code review using 6 parallel subagents. Detects the project's stack and applies only the rules that fit. Use for large PRs spanning multiple domains.
 argument-hint: "[optional: file path or diff range, e.g. HEAD~3..HEAD]"
 disable-model-invocation: true
 ---
 
 # TypeScript / JavaScript Code Review (multi-agent)
 
-Dispatch 6 parallel subagents. Four follow strict scoped checklists; a fifth holistic agent reviews the entire changeset without a checklist to catch emergent issues; a sixth reviews through the clean-code lens using the `clean-code` skill. Aggregate findings into one severity-grouped report. **First detect the project's stack and only apply rules for tools actually present — all subagents respect the same skip-rules.**
+Dispatch 6 parallel subagents. Four follow strict scoped checklists; a fifth holistic agent reviews the entire changeset without a checklist to catch emergent issues; a sixth reviews through the clean-code lens using `athkatla-skills:clean-code`. Aggregate findings into one severity-grouped report. **First detect the project's stack and only apply rules for tools actually present — all subagents respect the same skip-rules.**
 
 ## Step 0 — Detect stack
 
@@ -63,7 +62,7 @@ Scope: cross-file consistency, design coherence, integration points, subtle bugs
 Prompt template + axes definition + spec-discovery guidance:
 @../../checklists/ts/holistic-pass.md
 
-### Agent 6 — Clean Code (uses the clean-code skill)
+### Agent 6 — Clean Code (uses `athkatla-skills:clean-code`)
 Scope: readability and maintainability only — intention-revealing naming, self-explanatory code instead of comments, declarative/functional patterns over nested if/else, clear code structure, small focused functions and files, DRY.
 Prompt template: see "Clean-Code Subagent Prompt Template" at the end of this file.
 Expected overlap with Agent 2's Naming Precision / Code Style items is fine; aggregation keeps both.
@@ -81,7 +80,7 @@ After all 6 agents return:
 2. Number sequentially starting from 1
 3. Group by severity: CRITICAL > HIGH > MEDIUM > LOW
 4. Tag each finding with its domain in brackets. Preserve `[Holistic]`, `[Spec]`, `[Structure]`, and `[Clean Code]` tags verbatim.
-5. Do NOT aggressively deduplicate. When in doubt, INCLUDE the finding.
+5. Favor inclusion: when in doubt, include the finding rather than deduplicating aggressively.
 6. Keep both versions when a holistic finding overlaps with a checklist finding.
 
 ## Step 4 — Final verdict
@@ -95,7 +94,7 @@ Use this when constructing each scoped subagent's prompt. Replace `{AGENT_GROUP_
 ```
 You are a specialized TypeScript/React code reviewer focusing EXCLUSIVELY on: {AGENT_GROUP_NAME}.
 
-STRICT SCOPING: Review ONLY against the checklist items provided below. Do NOT review items outside your assigned scope. Other agents are handling those sections.
+STRICT SCOPING: Review ONLY against the checklist items provided below. Other agents are handling everything outside your assigned scope.
 
 ## Stack Summary & Skip Rules
 {STACK_SUMMARY}
@@ -132,9 +131,9 @@ Structural red flags (beyond your checklist): if a change in your files clearly 
 Use this for Agent 6. Replace `{CHANGED_FILES}` and `{DIFF}`.
 
 ```
-You are a clean-code reviewer focusing EXCLUSIVELY on code clarity and maintainability. You do NOT review stack-specific rules, architecture, security, or tests — other agents own those.
+You are a clean-code reviewer focusing EXCLUSIVELY on code clarity and maintainability. Other agents own stack-specific rules, architecture, security, and tests.
 
-First, invoke the `clean-code` skill via the Skill tool and apply its standards and severity rubric to the changed files. If the skill is not available, apply this fallback checklist instead:
+First, invoke `athkatla-skills:clean-code` via the Skill tool and apply its standards and severity rubric to the changed files. If the skill is not available, apply this fallback checklist instead:
 - Intention-revealing names for variables, functions, types, files. Flag vague names (data, info, temp, handle, process) and misleading names.
 - Self-explanatory code instead of comments. A comment explaining WHAT the code does is a naming/structure smell; comments only earn their place stating constraints the code cannot express.
 - Declarative / functional style over imperative nesting: early returns over nested if/else chains, map/filter/reduce over index loops where it reads better, no flag-argument branching.

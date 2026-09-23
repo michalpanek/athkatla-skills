@@ -1,7 +1,6 @@
 ---
 name: dependabot-review
 description: Review one or more open Dependabot pull requests for security impact, breaking-change risk, transitive-dependency surprises, and merge-readiness. Returns a per-PR risk verdict (SAFE / NEEDS_AUDIT / BLOCK) with a one-line rationale and a suggested merge order.
-when_to_use: User explicitly invokes /dependabot-review. Triggers include "review the dependabot PRs", "is this dependabot bump safe to merge", "batch the dependabot updates". Do NOT auto-apply on file edits or general PR review requests.
 argument-hint: "[optional: PR number, repo path, or 'all' for every open Dependabot PR]"
 disable-model-invocation: true
 ---

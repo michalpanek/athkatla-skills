@@ -1,6 +1,6 @@
 ---
 name: promote-rules-to-skills
-description: Use ONLY when the user explicitly invokes this skill (e.g. /promote-rules-to-skills, "promote my rules to skills", "convert my rules into skills", "make my rules auto-discoverable", "revive / fix my dormant skills") or accepts the promotion offer at the end of optimize-agent-md. Promotes project rule files (.claude/rules/*.md) into discoverable .claude/skills/<name>/SKILL.md skills and migrates dormant flat .claude/skills/*.md files. Claude Code only. Do NOT auto-invoke.
+description: Promotes project rule files (.claude/rules/*.md) into discoverable skills (.claude/skills/<name>/SKILL.md) and migrates dormant flat skill files. Claude Code only.
 disable-model-invocation: true
 ---
 
@@ -10,7 +10,7 @@ disable-model-invocation: true
 
 Promote rule files from `.claude/rules/` into **skills** (`.claude/skills/<name>/SKILL.md`). A rule file only activates when something tells the agent to read it (a router link, or the agent guessing). A skill's `name` + `description` sit in the system prompt, so the model pulls the body in by task relevance on its own, and the user can run it as `/name`. For topic-shaped, detail-heavy rules that is a real upgrade; for tiny always-on rules it is not (see hybrid, below).
 
-Companion to **optimize-agent-md**: that skill audits and splits a root config into rule files + router; this one takes the rule files further. Run it standalone too — any repo with `.claude/rules/` or dormant flat skill files qualifies.
+Companion to `athkatla-skills:optimize-agent-md`: that skill audits and splits a root config into rule files + router; this one takes the rule files further. Run it standalone too — any repo with `.claude/rules/` or dormant flat skill files qualifies.
 
 **Scope guard — Claude Code only.** Skill auto-discovery is a Claude Code feature. Do this only for `.claude/rules/` and `.claude/skills/`. For `.agents/` (Codex) and `.gemini/` (Gemini), promoting rules makes them dormant unless you have confirmed that ecosystem auto-discovers skills the same way. When unsure, keep the rules and say so.
 
@@ -20,13 +20,13 @@ Companion to **optimize-agent-md**: that skill audits and splits a root config i
   - "Promote rules to skills" / "convert my rules into skills"
   - "Make my rules auto-discoverable"
   - "Revive / fix my dormant skills" (flat `.claude/skills/*.md` files that never trigger)
-- User accepted the promotion offer at the end of an optimize-agent-md run.
+- User accepted the promotion offer at the end of an `athkatla-skills:optimize-agent-md` run.
 
 ## When NOT to use
 
-- Auto-invocation. Manual only.
+- Run this skill only when the user explicitly invokes it or accepts the promotion offer at the end of an `athkatla-skills:optimize-agent-md` run. Noticing `.claude/rules/` exists, reading a rule file incidentally, or a generic "improve my setup" request with no mention of skills or rules promotion are not invocations — when unsure whether the user wants this skill, ask before running.
 - Repo is not Claude Code (no `.claude/` tree, rules live in `.agents/` or `.gemini/`).
-- User only wants the router split: that is optimize-agent-md.
+- User only wants the router split: that is `athkatla-skills:optimize-agent-md`.
 
 ## Decision per rule file
 
@@ -51,7 +51,7 @@ digraph promote {
 
 **Two forks are the user's call, not yours — ask via one batched question:**
 - For each always-on discipline rule: **hybrid** vs **full skill**. Default recommend hybrid. If hybrid, also ask where the critical subset lives (usually a slimmed `rules/<x>.md`, not back in the root file).
-- For each redundant rule: **drop** vs **keep as a thin skill**. Default recommend drop.
+- For each redundant rule: **drop** vs **keep as a thin skill**. Default recommend drop. When dropping, delete the rule outright; absorbing it into another file only relocates the duplication.
 
 ## The rules that govern the conversion
 
@@ -97,17 +97,6 @@ triggers:        # only if the repo's other skills use this field
 <the rule content, moved verbatim from the rule file>
 ```
 
-## Common mistakes
-
-- **Writing a flat skill file.** `.claude/skills/<name>.md` is dormant: never discovered. Always the directory form `.claude/skills/<name>/SKILL.md`. Same trap when migrating: must `mkdir` the dir, not leave the `.md` at the skills root.
-- **Skipping the flat-file sweep.** A repo can already contain dormant flat skills. Detect and migrate them even if the user only asked about rules.
-- **Fully skillifying an always-on rule.** If the skill does not fire, the rule is silently skipped. Use the hybrid pattern (slim subset in `rules/`, full detail in skill) for anything that must hold on every task.
-- **Absorbing a redundant rule instead of dropping it.** A rule that just restates a loaded MCP server's instructions or an existing skill should be deleted, not moved into another file. Moving it keeps the duplication.
-- **Promoting rules outside Claude Code.** Skill auto-discovery is Claude-specific. For `.agents/` / `.gemini/`, promotion can make rules dormant. Stay at the router unless you confirmed that ecosystem discovers skills.
-- **Description that summarizes the workflow.** The model then follows the description and skips the body. Description = triggers only.
-- **Promoting tiny rule files.** Under ~30 lines and phase-scoped: leave as a rule. The skill wrapper costs more discovery overhead than it saves.
-- **Skipping the live-discovery check.** Writing the SKILL.md is not done; seeing it in the skills list is done.
-
 ## Deliverable shape
 
 Final user message must contain:
@@ -117,12 +106,3 @@ Final user message must contain:
 4. The git-tracking finding and its real sharing implication for this repo.
 5. Router rewiring summary: what the root file points at now.
 6. Suggested next step: `git diff <ROOT_FILE> .claude/rules/ .claude/skills/` for review.
-
-## Manual-only invocation
-
-This skill is invoked manually or via the explicit offer at the end of optimize-agent-md. Do not trigger it from:
-- Noticing `.claude/rules/` exists.
-- Reading a rule file incidentally.
-- Generic "improve my setup" requests without explicit mention of skills or rules promotion.
-
-If unsure whether the user wants this skill, ask before running.

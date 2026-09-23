@@ -1,6 +1,6 @@
 # Conflict Resolutions
 
-These rules from `/typescript-best-practices` are **overridden** by our project conventions:
+These rules from the `vp-typescript-best-practices` skill are **overridden** by our project conventions:
 
 | TS Best Practice says | Our convention (wins) | Reason |
 |---|---|---|

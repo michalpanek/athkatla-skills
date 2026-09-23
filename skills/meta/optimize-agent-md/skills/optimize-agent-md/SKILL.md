@@ -1,6 +1,6 @@
 ---
 name: optimize-agent-md
-description: Use ONLY when the user explicitly invokes this skill (e.g. /optimize-agent-md, "optimize my CLAUDE.md", "optimize my AGENTS.md", "audit and split AGENTS.md / CLAUDE.md", "split my agent rules", "make my agent config a router"). Audits a monolithic root agent-config file (CLAUDE.md, AGENTS.md, GEMINI.md, or equivalent), detects stale or copy-pasted rules that do not match the current project, splits surviving content per subject into small rule files (.claude/rules/, .agents/rules/, .gemini/rules/) or, per user choice in Claude Code, into auto-discoverable skills (.claude/skills/<name>/SKILL.md), and rewrites the root file as an on-demand router. Do NOT auto-invoke.
+description: Audits a monolithic root agent-config file (CLAUDE.md, AGENTS.md, GEMINI.md), drops stale or copy-pasted rules, and splits the survivors into a router plus per-subject rule files or skills.
 disable-model-invocation: true
 ---
 
@@ -12,7 +12,7 @@ Audit, slim, and split a project's root agent-config file (`CLAUDE.md`, `AGENTS.
 
 Works across agent ecosystems. Auto-detects the agent flavor from filenames and rewrites the right tree (`.claude/rules/`, `.agents/rules/`, `.gemini/rules/`).
 
-In a Claude Code repo, each subject has two possible destinations: a **rule file** (`.claude/rules/<subject>.md`, loaded via the router) or a **skill** (`.claude/skills/<subject>/SKILL.md`, auto-discovered by task relevance and `/name`-invocable). The user chooses per subject in step 4; they can mix freely. Skill-destined subjects follow the conversion rules of the companion skill **promote-rules-to-skills**. Outside Claude Code (`.agents/`, `.gemini/`), everything goes to rule files.
+In a Claude Code repo, each subject has two possible destinations: a **rule file** (`.claude/rules/<subject>.md`, loaded via the router) or a **skill** (`.claude/skills/<subject>/SKILL.md`, auto-discovered by task relevance and `/name`-invocable). The user chooses per subject in step 4; they can mix freely. Skill-destined subjects follow the conversion rules of the companion skill `athkatla-skills:promote-rules-to-skills`. Outside Claude Code (`.agents/`, `.gemini/`), everything goes to rule files.
 
 **Core principle:** wrong rules are worse than no rules. Hallucinated constraints (libraries that are not installed, paths that do not exist) waste tokens and produce broken suggestions. Verify every claim against the current repo before keeping it.
 
@@ -28,10 +28,10 @@ In a Claude Code repo, each subject has two possible destinations: a **rule file
 
 ## When NOT to use
 
-- Auto-invocation. Manual only. Do not run because you happened to read the root config file.
+- Run this skill only when the user explicitly invokes it, accepts its offer, or names the target file. Reading the root config file at session start, noticing a stale rule, or a generic "audit my project" request with no named file are not invocations — when unsure whether the user wants this skill, ask before running.
 - Single short root file (<80 lines) with no stale content. Split adds discovery burden for no gain.
 - Project explicitly relies on one flat file by convention.
-- User asks ONLY to promote already-existing rule files into skills, or to revive dormant flat skills, with no root-file split involved: that is **promote-rules-to-skills** standalone. (Within this skill's own workflow, step 5 still delegates skill-destined subjects to it.)
+- User asks ONLY to promote already-existing rule files into skills, or to revive dormant flat skills, with no root-file split involved: that is `athkatla-skills:promote-rules-to-skills` standalone. (Within this skill's own workflow, step 5 still delegates skill-destined subjects to it.)
 
 ## Workflow
 
@@ -93,14 +93,15 @@ For each rule, library, command, path, or convention mentioned, verify it matche
 | MFE / micro-frontend rules | search for actual MFE infra (single-spa, module federation) |
 | External rule file `.github/REVIEW_RULES.md` | `ls` it |
 | Slack channel / Linear project / Jira project references | check `.github/` workflows, env files, or ask user |
+| Convention (naming, barrels, etc.) matches current code | sample 2-3 files |
 
-If a claim cannot be verified, flag it for removal. Common red flags:
-- Mentions of `@<org>/shared-*` packages that are not in the manifest.
-- Mentions of `apps/*`, `packages/*`, `services/*` directories in a single-package repo.
-- Rules referring to "MFE", "MountMicroFrontend", "service-registry", "root-config" with no matching code.
-- Slack channel mapping, Sentry projects, infra names from another org.
-- Tooling references that don't match (e.g. `eslint` rules listed but project uses Biome / Ruff / ktlint).
-- Rules about a language not present in the repo (e.g. Java rules in a Node-only project).
+For each rule, also check:
+- Does it contradict another rule in the same file? Flag both for resolution.
+- Is it generic enough to apply to any project (e.g. "Be concise", "think before acting")? If yes, it belongs in the user's global agent config (`~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`, `~/.gemini/GEMINI.md`), not the project file. Drop it from the project files and list it in the final message under "recommend moving to global config". Do not edit the global config yourself.
+
+A rule is audited once it has one of three outcomes: verified and kept, reworded to match reality, or dropped with a one-line reason.
+
+If a claim cannot be verified, flag it as hallucinated and remove it. Common stale-rule patterns and how to handle each: see `references/stale-rule-patterns.md`.
 
 ### 3. Group survivors by subject
 
@@ -163,7 +164,7 @@ Each rule file:
 - Contains only rules verified in step 2.
 - No duplication across files. A rule lives in exactly one file; other files may reference it by filename.
 
-**Skill-destined subjects** go to `.claude/skills/<name>/SKILL.md` (directory form, never flat). Follow the conversion rules of the **promote-rules-to-skills** skill — invoke it if installed; if not installed, apply at minimum: directory form, third-person "Use when…" trigger-only description, name-collision check against existing skills and slash commands, hybrid for always-on disciplines, and verify each new skill appears in the available-skills list same session.
+**Skill-destined subjects** go to `.claude/skills/<name>/SKILL.md` (directory form, never flat). Follow the conversion rules of `athkatla-skills:promote-rules-to-skills` — invoke it if installed; if not installed, apply at minimum: directory form, third-person "Use when…" trigger-only description, name-collision check against existing skills and slash commands, hybrid for always-on disciplines, and verify each new skill appears in the available-skills list same session.
 
 ```
 .claude/skills/
@@ -171,7 +172,7 @@ Each rule file:
   review-checklist/SKILL.md
 ```
 
-If a subject is empty for this project, do not write any file. No empty stubs.
+Write a file only for a subject that has surviving content; skip any subject left empty by the audit.
 
 ### 6. Rewrite root `ROOT_FILE` as a router
 
@@ -234,49 +235,7 @@ In your final message to the user, list:
 - Rules dropped, with one-line reason each (cite evidence: "no `@x/y` in `package.json`", "no `apps/` dir").
 - Rules reworded, with what changed.
 
-User should be able to `git diff` and understand every change.
-
-## Audit checklist (use this when scanning rules)
-
-For each rule, ask:
-
-- [ ] Does the library/tool/path it references exist in this repo?
-- [ ] Does the command it references work (check `scripts` in `package.json` or equivalent)?
-- [ ] Does the convention it enforces match what current code actually does (sample 2-3 files)?
-- [ ] Is the rule generic-enough-to-survive that it would apply to any project? If yes, it belongs in the user's global agent config (`~/.claude/CLAUDE.md`, `~/.codex/AGENTS.md`, `~/.gemini/GEMINI.md`), not the project file. Drop it from the project files and list it in the final message under "recommend moving to global config". Do not edit the global config yourself.
-- [ ] Is the rule contradicted by another rule in the same file? Flag for resolution.
-
-## Common stale-rule patterns
-
-| Pattern | Action |
-|---|---|
-| `@<org>/shared-*` library rules | Verify package exists. If not, drop. |
-| MFE / `MountMicroFrontend` / `root-config` rules | Verify MFE infra exists. Otherwise drop the entire section. |
-| Slack channel mapping rules | Drop unless `.github/` workflows reference Slack. |
-| Specific test framework rules (Jest fixtures, Playwright POM, Pytest fixtures) | Verify framework matches. Reword to actual setup. |
-| Specific styling library rules (styled-components, emotion, CSS Modules, Tailwind) | Verify dep present. Drop or reword. |
-| State management rules (Redux selectors, Zustand stores, Pinia) | Verify lib in deps. Reword to actual lib. |
-| `index.ts` barrel file rules | Check if codebase uses them. Keep rule only if convention is followed. |
-| Jira/Linear/GitHub Issues references | Verify which tracker is actually used. |
-| Language-specific rules for unused language | Drop entire section. |
-
-## Common mistakes
-
-- **Splitting without auditing.** Carrying stale rules into smaller files just rearranges chairs. Audit first, drop irrelevant rules, then split.
-- **Fixed-template splitting.** Forcing content into predetermined buckets produces fat catch-all files. Subjects come from the content; a repo with no review rules gets no `review.md`.
-- **Over-granular splitting.** Twenty 8-line files is worse than six focused ones. Merge subjects under ~10 lines into a neighbor.
-- **Generic content in rule files.** "Be concise", "think before acting" applies to every project and belongs in the user's global agent config. Project rule files stay project-specific.
-- **Duplicating root content in rule files.** Pick one home per rule. Root file is a pure router plus 3-6 always-on quick rules.
-- **Vague router triggers.** "React rules" tells the agent nothing. Phrase each row as the task: "Writing or refactoring React components".
-- **Forgetting `docs/` routing.** If the repo has `docs/agents/*`, `CONTEXT.md`, or `docs/adr/`, the router should point there.
-- **Empty stubs.** If a subject is empty for this project, do not write the file. Skip.
-- **Hyphens / em-dashes in user-facing output if the project bans them.** Check root file for style rules before writing the final summary message.
-- **Mixing agent trees.** Do not split into both `.claude/rules/` and `.agents/rules/` in one run. Pick one target per invocation.
-- **Renaming working filenames.** If existing tree already has sensible per-subject files, keep the names. Do not churn names.
-- **Skipping the destination question.** In Claude Code, the rule-vs-skill choice per subject is the user's, asked once, batched. Do not silently write everything as rules, and do not skillify anything without their pick.
-- **Offering skills outside Claude Code.** `.agents/` / `.gemini/` get rule files only. Skill auto-discovery is Claude Code specific; a skill there is dormant content.
-- **Writing a flat skill file.** `.claude/skills/<name>.md` never triggers. Always the directory form `.claude/skills/<name>/SKILL.md`.
-- **Fully skillifying an always-on discipline.** If the skill fails to fire, the rule is silently skipped. Recommend hybrid: slim non-negotiables stay as a rule file, full detail goes to the skill.
+Check the root file for existing output-style rules (for example, a ban on hyphens or em-dashes) and follow them when writing this message. User should be able to `git diff` and understand every change.
 
 ## Deliverable shape
 
@@ -287,12 +246,3 @@ Final user message must contain:
 4. The router table as written.
 5. (If skills were created) live-discovery confirmation: each new skill appears in the available-skills list.
 6. Suggested next step: `git diff <ROOT_FILE> <RULES_DIR>` for review (add `.claude/skills/` when skills were created).
-
-## Manual-only invocation
-
-This skill is invoked manually. Do not trigger it from:
-- Reading the root agent file at session start.
-- Encountering a stale rule incidentally.
-- Generic "audit my project" requests without explicit mention of `CLAUDE.md` / `AGENTS.md` / `GEMINI.md` or a rules directory.
-
-If unsure whether the user wants this skill, ask before running.

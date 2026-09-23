@@ -1,7 +1,6 @@
 ---
 name: ts-review-lite
-description: Fast, single-pass TypeScript / JavaScript code review on uncommitted changes. Compressed sibling of `ts-review` — same domains, fewer items, designed to fit inside ~80 model turns. Use for local pre-commit sanity checks, CI runs on budget-constrained models, or a quick second pass after fixing obvious issues. For final pre-merge review on a high-risk PR, use the full `ts-review` skill instead.
-when_to_use: User explicitly invokes /ts-review-lite. Triggers include "fast review", "lite TS review", "quick TS sanity check", "budget review of TS changes". Do NOT auto-apply on edits, file saves, or generic "review my code" requests — this skill is opt-in only.
+description: Fast, single-pass TypeScript / JavaScript code review on uncommitted changes. Compressed sibling of `ts-review` — same domains, fewer items, designed to fit inside ~80 model turns.
 argument-hint: "[optional: file path or diff range, e.g. HEAD~3..HEAD]"
 disable-model-invocation: true
 ---
@@ -18,8 +17,8 @@ Compressed sibling of `ts-review`. Same domains, fewer items, single-pass execut
 
 ## When NOT to Use
 
-- Final pre-merge review on a high-risk PR — use full `ts-review`
-- Non-TS/JS code — use the language-specific reviewer (`java-review` for Java, etc.)
+- Final pre-merge review on a high-risk PR — use full `/athkatla-skills:ts-review`
+- Non-TS/JS code — use the language-specific reviewer (`/athkatla-skills:java-review` for Java, etc.)
 - Pure CSS/HTML, config-only, generated migration files
 
 ## Execution Model (CRITICAL — read first)
@@ -150,11 +149,10 @@ Do NOT post inline PR comments from this skill — that is the CI workflow's job
 
 ## Common Mistakes While Running This Skill
 
-- **Reading files one at a time instead of in parallel batch.** This is the #1 cause of turn-cap exhaustion. Issue all `Read` calls in the same response.
-- **Re-opening files between checklist sections.** Hold the full text in working context after the read batch.
+Beyond the Execution Model above:
+
 - **Drilling into framework-internal files** (`node_modules`, `.next/`, generated migrations). Filter the diff first.
 - **Producing inline patch suggestions for every LOW finding.** LOW gets a one-liner only.
-- **Falling back to the full skill mid-run.** If diff is too big, stop and report; do not switch skills.
 
 ## Quick Reference (most commonly violated items)
 

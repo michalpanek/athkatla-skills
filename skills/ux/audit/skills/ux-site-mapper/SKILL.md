@@ -1,11 +1,10 @@
 ---
 name: ux-site-mapper
 description: >
-  Maps a Next.js application's route structure into a site map, then hands off to the
-  ux-ui-auditor skill for a systemic UX audit against that map. Use when the user wants to
-  audit an entire Next.js app (not a single component) — "audit the whole site", "map and
-  audit", "find UX issues across the app" — or provides a Next.js codebase path for a
-  systemic UX review.
+  Maps a Next.js app's route structure into a site map, then hands off to
+  athkatla-skills:ux-ui-auditor for a systemic UX audit against that map. Use when the user
+  wants to audit an entire Next.js app rather than a single component — "audit the whole
+  site", "map and audit" — or gives a Next.js codebase path for a systemic UX review.
 ---
 
 # UX Site Mapper Skill
@@ -15,8 +14,8 @@ description: >
 ## Overview
 
 This skill maps a Next.js codebase into a structured site map, optionally captures
-live screenshots, then hands the full map + screenshots to `ux-ui-auditor` for a
-systemic audit. Issues are pinned per route, then cross-cutting patterns are
+live screenshots, then hands the full map + screenshots to `athkatla-skills:ux-ui-auditor`
+for a systemic audit. Issues are pinned per route, then cross-cutting patterns are
 summarised separately.
 
 Supports both `app/` router (Next.js 13+) and `pages/` router.
@@ -42,6 +41,8 @@ Also ask:
 - **Codebase root path** — where is the Next.js project? (e.g. `/path/to/your-next-app`)
 - **Base URL** — only if source includes live crawl (e.g. `http://localhost:3000`)
 - **User role context** (optional) — admin / regular user / guest? Helps interpret auth-gated routes.
+
+Step 1 is done when scope, source, and the codebase root path are all answered, and the base URL is answered too when the source includes a live crawl.
 
 ---
 
@@ -158,10 +159,10 @@ If a route redirects (e.g. auth-gated route redirects to `/login`), note this in
 
 ---
 
-## Step 5 — Hand Off to ux-ui-auditor
+## Step 5 — Hand Off to `athkatla-skills:ux-ui-auditor`
 
-Once the site map is built (and screenshots captured if applicable), invoke the
-`ux-ui-auditor` skill with the following context package:
+Once the site map is built (and screenshots captured if applicable), invoke
+`athkatla-skills:ux-ui-auditor` with the following context package:
 
 ```
 AUDIT CONTEXT:
@@ -182,7 +183,7 @@ Run the full ux-ui-auditor checklist with these additions:
 
 ## Step 6 — Output Format
 
-The final report structure (produced by ux-ui-auditor, shaped by this skill):
+The final report structure (produced by `athkatla-skills:ux-ui-auditor`, shaped by this skill):
 
 ```markdown
 # UX Site Audit Report

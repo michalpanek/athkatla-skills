@@ -1,14 +1,13 @@
 ---
 name: java-review-multi-agent
-description: Opinionated Java code review (Spring Boot-focused) using 6 parallel subagents. Auto-detects the project's stack (Spring Boot starters, JPA, Lombok, Vavr, Resilience4j, Spock, RabbitMQ, etc.) and applies ONLY rules for tools actually in use. Works for single-module or multi-module Maven/Gradle projects. Use for large PRs spanning multiple domains.
-when_to_use: User explicitly invokes /java-review-multi-agent. Do NOT auto-apply on edits or generic "review my code" requests — this skill is opt-in only.
+description: Java Spring Boot code review using 6 parallel subagents (scoped, holistic, clean-code). Detects the project's stack and applies only the relevant rules; best for large PRs spanning multiple domains.
 argument-hint: "[optional: file path or diff range, e.g. HEAD~3..HEAD]"
 disable-model-invocation: true
 ---
 
 # Java Spring Boot Code Review (multi-agent)
 
-Dispatch 6 parallel subagents. Four follow strict scoped checklists; a fifth holistic agent reviews the entire changeset without a checklist to catch emergent issues; a sixth reviews through the clean-code lens using the `clean-code` skill. Aggregate findings into one severity-grouped report. **First detect the project's stack and only apply rules for tools actually present — all subagents respect the same skip-rules.**
+Dispatch 6 parallel subagents. Four follow strict scoped checklists; a fifth holistic agent reviews the entire changeset without a checklist to catch emergent issues; a sixth reviews through the clean-code lens using `athkatla-skills:clean-code`. Aggregate findings into one severity-grouped report. **First detect the project's stack and only apply rules for tools actually present — all subagents respect the same skip-rules.**
 
 ## Step 0 — Detect stack
 
@@ -65,10 +64,10 @@ Scope: cross-file consistency, design coherence, integration points, subtle bugs
 Prompt template + axes definition + spec-discovery guidance:
 @../../checklists/java/holistic-pass.md
 
-### Agent 6 — Clean Code (uses the clean-code skill)
-Scope: readability and maintainability — intention-revealing naming, self-explanatory code instead of comments, declarative/functional patterns over nested if/else, clear code structure, small focused methods and classes, DRY — plus test value: every new test must protect a business rule of the change.
+### Agent 6 — Clean Code (uses `athkatla-skills:clean-code`)
+Scope: readability, maintainability, and test value. Rules live in the clean-code and test-value checklists (see the prompt template below), not here.
 Prompt template: see "Clean-Code Subagent Prompt Template" at the end of this file.
-Expected overlap with Agent 3's Naming Precision / Code Style items and Agent 4's Test Value findings is fine; aggregation keeps both.
+Agent 6 also owns the method-naming rule (methods start with a verb), which Agent 3 checks too. Expected overlap with Agent 3's Naming Precision / Code Style items and Agent 4's Test Value findings is fine; aggregation keeps both.
 
 ### Test Value (Agents 4 and 6)
 @../../checklists/java/test-value.md
@@ -97,7 +96,7 @@ Use this when constructing each scoped subagent's prompt. Replace `{AGENT_GROUP_
 ```
 You are a specialized Java Spring Boot code reviewer focusing EXCLUSIVELY on: {AGENT_GROUP_NAME}.
 
-STRICT SCOPING: Review ONLY against the checklist items provided below. Do NOT review items outside your assigned scope. Other agents are handling those sections.
+STRICT SCOPING: review only the checklist items provided below. Other agents cover everything outside this scope.
 
 ## Stack Summary & Skip Rules
 {STACK_SUMMARY}
@@ -131,12 +130,12 @@ Structural red flags (beyond your checklist): if a change in your files clearly 
 
 ## Clean-Code Subagent Prompt Template
 
-Use this for Agent 6. Replace `{CHANGED_FILES}`, `{DIFF}`, `{CLEAN_CODE_FALLBACK}` (inline content of `@../../checklists/java/clean-code.md`), and `{TEST_VALUE}` (inline content of `@../../checklists/java/test-value.md`).
+Use this for Agent 6. Replace `{CHANGED_FILES}`, `{DIFF}`, `{CLEAN_CODE_FALLBACK}` (inline content of `@../../checklists/java/clean-code.md`), `{TEST_VALUE}` (inline content of `@../../checklists/java/test-value.md`), and `{METHOD_NAMING}` (inline the "Methods start with a verb" item from `@../../checklists/java/03-code-quality-type-safety.md` § Naming Precision).
 
 ```
 You are a clean-code reviewer focusing EXCLUSIVELY on code clarity, maintainability, and test value. Stack-specific rules, architecture, security, and test style belong to other agents.
 
-First, invoke the `clean-code` skill via the Skill tool and apply its standards and severity rubric to the changed files. If the skill is not available, apply this fallback checklist instead:
+First, invoke `athkatla-skills:clean-code` via the Skill tool and apply its standards and severity rubric to the changed files. If the skill is not available, apply this fallback checklist instead:
 {CLEAN_CODE_FALLBACK}
 
 ## Changed Files
@@ -148,19 +147,23 @@ First, invoke the `clean-code` skill via the Skill tool and apply its standards 
 ## Test Value
 {TEST_VALUE}
 
+## Method Naming
+{METHOD_NAMING}
+
 ## Severity Guidelines
 <inline content of @../../checklists/java/severity-guidelines.md>
 
 ## Instructions
 1. Read each changed/new Java or Groovy file in full (not just the diff).
 2. Judge only what this change introduces or worsens; do not demand refactors of untouched legacy code.
-3. Run the Test Value gate on every new test in the change. For each test, name the business rule it protects, or flag it for removal.
-4. For each finding, report:
+3. Run the Test Value gate on every new test in the change (Test Value section above).
+4. Check every new or renamed method name against the Method Naming rule above. Tag findings `[Clean Code]`.
+5. For each finding, report:
    - Severity (CRITICAL / HIGH / MEDIUM / LOW)
    - Tag `[Clean Code]`, or `[Test Value]` for gate findings
    - File path and line number
    - Issue description naming the violated principle
    - Suggested fix (show the cleaner version when short)
-5. Group findings by severity.
-6. If no issues found, report "No issues found in Clean Code".
+6. Group findings by severity.
+7. If no issues found, report "No issues found in Clean Code".
 ```

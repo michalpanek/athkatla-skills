@@ -1,7 +1,6 @@
 ---
 name: java-review
-description: Opinionated Java code review (Spring Boot-focused). Auto-detects the project's stack (Spring Boot starters, JPA, Lombok, Vavr, Resilience4j, Spock, RabbitMQ, etc.) and applies ONLY rules for tools actually in use. Works for single-module or multi-module Maven/Gradle projects. Step 0 stack detection verifies Spring Boot presence — non-Spring-Boot Java projects get a heads-up before review. Single agent walks every applicable section sequentially, then runs clean-code and test-value passes.
-when_to_use: User explicitly invokes /java-review. Do NOT auto-apply on edits, file saves, or generic "review my code" requests — this skill is opt-in only.
+description: Single-agent Java Spring Boot code review. Detects the project's stack, applies only the relevant rules, then runs clean-code and test-value passes.
 argument-hint: "[optional: file path or diff range, e.g. HEAD~3..HEAD]"
 disable-model-invocation: true
 ---
@@ -36,6 +35,8 @@ Read these if they exist:
 - Existing test files (e.g. integration test base classes) — current testing patterns
 - Any spec artifact for the current change (see Step 5 below)
 
+Move to Step 3 once every existing item above has been read.
+
 ## Step 3 — Walk the checklist
 
 Apply every applicable item from each section against every changed file. Read entire changed files (not just the diff hunks).
@@ -54,11 +55,13 @@ Apply every applicable item from each section against every changed file. Read e
 
 ## Step 4 — Clean-Code Pass (clarity, maintainability, test value)
 
-Invoke the `clean-code` skill via the Skill tool. Apply its standards and severity rubric to every changed file. If the skill is not available, apply this fallback:
+Invoke `athkatla-skills:clean-code` via the Skill tool. Apply its standards and severity rubric to every changed file. If the skill is not available, apply this fallback:
 @../../checklists/java/clean-code.md
 
-Then run the Test Value gate on every new test in the change. For each test, name the business rule it protects, or flag it for removal. A test that fails the gate gets only the removal finding: drop its Step 3 test-style findings.
+Then run the Test Value gate on every new test in the change. A test that fails the gate gets only the removal finding: drop its Step 3 test-style findings.
 @../../checklists/java/test-value.md
+
+Check every new or renamed method name against the "Methods start with a verb" item in Naming Precision (Step 3, `03-code-quality-type-safety.md`). Reviewers report this miss often.
 
 Tag findings `[Clean Code]` or `[Test Value]`.
 

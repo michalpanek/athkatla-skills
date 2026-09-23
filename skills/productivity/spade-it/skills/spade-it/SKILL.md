@@ -22,7 +22,7 @@ If the user hasn't named a decision, ask for it before proceeding.
 
 ## Phase S — Setting
 
-Help the user define three dimensions precisely. Don't accept vague answers.
+Help the user define three dimensions precisely. Push back on vague answers.
 
 **What** — The exact decision, with all its axes. "Which vendor to pick" is weak. "Which ATS to run for the next three years, optimizing for functionality and switching cost" is precise. Push until there is zero ambiguity about what is being chosen.
 
