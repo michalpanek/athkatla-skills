@@ -30,10 +30,12 @@ Filter to `.ts`, `.tsx`, `.js`, `.jsx`. If no TypeScript/React files changed, re
 ## Step 2 — Load project context
 
 Read these if they exist:
-- `CLAUDE.md` (root and any nested) — project conventions
-- `.claude/rules/` — additional coding standards
+- `CLAUDE.md` and `AGENTS.md` (root and any nested) — project conventions
+- Every file in `.claude/rules/` and `.agents/rules/`, and each project skill or doc they route to for TypeScript, React, naming, tests, or review
 - Existing test files — current testing patterns
-- Any spec artifact for the current change (see Step 4 below)
+- Any spec artifact for the current change (see Step 5 below)
+
+A project rule wins over a checklist item when they conflict. Move to Step 3 once every existing item above has been read.
 
 ## Step 3 — Walk the checklist
 
@@ -54,21 +56,28 @@ Apply every applicable item from each section against every changed file. Read e
 ### Conflict Resolutions (project conventions vs general TS best-practices)
 @../../checklists/ts/conflict-resolutions.md
 
-## Step 4 — Holistic Pass (Standards + Spec axes)
+## Step 4 — Clean-Code Pass (clarity, maintainability)
+
+Invoke `athkatla-skills:clean-code` via the Skill tool. Apply its standards and severity rubric to every changed file. Judge only what this change introduces or worsens. If the skill is not available, apply this fallback:
+@../../checklists/ts/clean-code.md
+
+Tag findings `[Clean Code]`.
+
+## Step 5 — Holistic Pass (Standards + Spec axes)
 
 @../../checklists/ts/holistic-pass.md
 
-## Step 5 — Severity guidelines
+## Step 6 — Severity guidelines
 
 @../../checklists/ts/severity-guidelines.md
 
-## Step 6 — Report
+## Step 7 — Report
 
-Group findings by severity (CRITICAL > HIGH > MEDIUM > LOW). Number sequentially. Tag each with its domain (e.g. `[Architecture]`, `[Type Safety]`, `[UI]`, `[Holistic]`, `[Spec]`). For each finding: file path and line number, rule violated, suggested fix.
+Group findings by severity (CRITICAL > HIGH > MEDIUM > LOW). Number sequentially. Tag each with its domain (e.g. `[Architecture]`, `[Type Safety]`, `[UI]`, `[Clean Code]`, `[Holistic]`, `[Spec]`). For each finding: file path and line number, rule violated, suggested fix.
 
 End with PASS / FAIL verdict. FAIL if any CRITICAL or HIGH finding (including `[Spec]`-tagged).
 
-## Step 7 — Validation (if not already run)
+## Step 8 — Validation (if not already run)
 
 After review, suggest running on changed files:
 - Project formatter (Prettier / Biome)

@@ -27,7 +27,18 @@ If `$ARGUMENTS` is provided, treat as diff range or file list. Otherwise default
 
 Filter to `.java` and `.groovy` (Spock specs). Keep test resource files (`src/test/resources/**`) in the changed-files list: the Test Value gate needs the fixtures. If no `.java` or `.groovy` files match, report "No Java files to review" and stop.
 
-## Step 2 — Dispatch 6 subagents IN PARALLEL
+## Step 2 — Load project context
+
+Read these if they exist, before you dispatch any agent:
+- `CLAUDE.md` and `AGENTS.md`, at the root and in the changed modules
+- Every file in `.claude/rules/` and `.agents/rules/`
+- Each project skill or doc that those files route to for Java code, naming, tests, or review
+
+Write `{PROJECT_RULES}`: every project rule that bears on the changed files, quoted or tightly paraphrased, each with its source file. A project rule wins over a checklist item when they conflict. List each conflict in `{PROJECT_RULES}`, so the agents apply the project side.
+
+Step 2 is done when every existing file above is read and `{PROJECT_RULES}` is written, or reads "No project rules found".
+
+## Step 3 — Dispatch 6 subagents IN PARALLEL
 
 All 6 in a single message with parallel `Agent` tool calls.
 
@@ -35,6 +46,7 @@ Each scoped agent (1-4) receives:
 - The agent-group checklist (referenced below)
 - The severity guidelines
 - The changed-files list and full diff
+- `{PROJECT_RULES}` from Step 2. Every agent gets it; append it to the holistic prompt of agent 5 as a `## Project Rules` section.
 - The "Scoped Subagent Prompt Template" at the end of this file (agent 5 uses the holistic prompt from `@../../checklists/java/holistic-pass.md` instead; agent 6 uses the "Clean-Code Subagent Prompt Template")
 
 ### Agent 1 — Architecture & Spring Configuration
@@ -75,7 +87,7 @@ Agent 6 also owns the method-naming rule (methods start with a verb), which Agen
 ### Severity guidelines (all agents)
 @../../checklists/java/severity-guidelines.md
 
-## Step 3 — Aggregate results
+## Step 4 — Aggregate results
 
 After all 6 agents return:
 1. Collect findings from all agents (including `[Holistic]`, `[Spec]`, `[Clean Code]`, and `[Test Value]` insights)
@@ -85,13 +97,13 @@ After all 6 agents return:
 5. Do NOT aggressively deduplicate. When in doubt, INCLUDE the finding.
 6. Keep both versions when a holistic finding overlaps with a checklist finding.
 
-## Step 4 — Final verdict
+## Step 5 — Final verdict
 
 End with PASS / FAIL. FAIL if any CRITICAL or HIGH finding, including `[Spec]`-tagged.
 
 ## Scoped Subagent Prompt Template
 
-Use this when constructing each scoped subagent's prompt. Replace `{AGENT_GROUP_NAME}`, `{STACK_SUMMARY}`, `{CHECKLIST}`, `{CHANGED_FILES}`, and `{DIFF}`.
+Use this when constructing each scoped subagent's prompt. Replace `{AGENT_GROUP_NAME}`, `{STACK_SUMMARY}`, `{CHECKLIST}`, `{PROJECT_RULES}`, `{CHANGED_FILES}`, and `{DIFF}`.
 
 ```
 You are a specialized Java Spring Boot code reviewer focusing EXCLUSIVELY on: {AGENT_GROUP_NAME}.
@@ -100,6 +112,9 @@ STRICT SCOPING: review only the checklist items provided below. Other agents cov
 
 ## Stack Summary & Skip Rules
 {STACK_SUMMARY}
+
+## Project Rules (win over the checklist on conflict)
+{PROJECT_RULES}
 
 ## Changed Files
 {CHANGED_FILES}
@@ -115,7 +130,7 @@ STRICT SCOPING: review only the checklist items provided below. Other agents cov
 
 ## Instructions
 1. Read each changed/new Java or Groovy file in full (not just the diff).
-2. Check EVERY applicable checklist item against EVERY changed file.
+2. Check EVERY applicable checklist item against EVERY changed file. Apply the Project Rules that fall in your scope with the same weight as checklist items.
 3. For each finding, report:
    - Severity (CRITICAL / HIGH / MEDIUM / LOW)
    - Domain tag in brackets matching checklist section name (e.g., [Architecture], [Spring Boot], [JPA Query])
@@ -130,13 +145,16 @@ Structural red flags (beyond your checklist): if a change in your files clearly 
 
 ## Clean-Code Subagent Prompt Template
 
-Use this for Agent 6. Replace `{CHANGED_FILES}`, `{DIFF}`, `{CLEAN_CODE_FALLBACK}` (inline content of `@../../checklists/java/clean-code.md`), `{TEST_VALUE}` (inline content of `@../../checklists/java/test-value.md`), and `{METHOD_NAMING}` (inline the "Methods start with a verb" item from `@../../checklists/java/03-code-quality-type-safety.md` § Naming Precision).
+Use this for Agent 6. Replace `{CHANGED_FILES}`, `{DIFF}`, `{PROJECT_RULES}`, `{CLEAN_CODE_FALLBACK}` (inline content of `@../../checklists/java/clean-code.md`), `{TEST_VALUE}` (inline content of `@../../checklists/java/test-value.md`), and `{METHOD_NAMING}` (inline the "Methods start with a verb" item from `@../../checklists/java/03-code-quality-type-safety.md` § Naming Precision).
 
 ```
 You are a clean-code reviewer focusing EXCLUSIVELY on code clarity, maintainability, and test value. Stack-specific rules, architecture, security, and test style belong to other agents.
 
 First, invoke `athkatla-skills:clean-code` via the Skill tool and apply its standards and severity rubric to the changed files. If the skill is not available, apply this fallback checklist instead:
 {CLEAN_CODE_FALLBACK}
+
+## Project Rules (win over the fallback on conflict)
+{PROJECT_RULES}
 
 ## Changed Files
 {CHANGED_FILES}

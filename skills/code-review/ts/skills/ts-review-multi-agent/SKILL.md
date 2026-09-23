@@ -27,7 +27,18 @@ If `$ARGUMENTS` is provided, treat as diff range or file list. Otherwise default
 
 Filter to `.ts`, `.tsx`, `.js`, `.jsx`. If no files match, report "No TypeScript files to review" and stop.
 
-## Step 2 — Dispatch 6 subagents IN PARALLEL
+## Step 2 — Load project context
+
+Read these if they exist, before you dispatch any agent:
+- `CLAUDE.md` and `AGENTS.md`, at the root and in the changed modules
+- Every file in `.claude/rules/` and `.agents/rules/`
+- Each project skill or doc that those files route to for TypeScript, React, naming, tests, or review
+
+Write `{PROJECT_RULES}`: every project rule that bears on the changed files, quoted or tightly paraphrased, each with its source file. A project rule wins over a checklist item when they conflict. List each conflict in `{PROJECT_RULES}`, so the agents apply the project side.
+
+Step 2 is done when every existing file above is read and `{PROJECT_RULES}` is written, or reads "No project rules found".
+
+## Step 3 — Dispatch 6 subagents IN PARALLEL
 
 All 6 in a single message with parallel `Agent` tool calls.
 
@@ -35,6 +46,7 @@ Each scoped agent (1-4) receives:
 - The agent-group checklist (referenced below)
 - The severity guidelines
 - The changed-files list and full diff
+- `{PROJECT_RULES}` from Step 2. Every agent gets it; append it to the holistic prompt of agent 5 as a `## Project Rules` section.
 - The "Scoped Subagent Prompt Template" at the end of this file (agent 5 uses the holistic prompt from `@../../checklists/ts/holistic-pass.md` instead; agent 6 uses the "Clean-Code Subagent Prompt Template")
 
 ### Agent 1 — Architecture & Data
@@ -73,7 +85,7 @@ Expected overlap with Agent 2's Naming Precision / Code Style items is fine; agg
 ### Conflict resolutions (context for all agents)
 @../../checklists/ts/conflict-resolutions.md
 
-## Step 3 — Aggregate results
+## Step 4 — Aggregate results
 
 After all 6 agents return:
 1. Collect findings from all agents (including `[Holistic]`, `[Spec]`, and `[Clean Code]` insights)
@@ -83,13 +95,13 @@ After all 6 agents return:
 5. Favor inclusion: when in doubt, include the finding rather than deduplicating aggressively.
 6. Keep both versions when a holistic finding overlaps with a checklist finding.
 
-## Step 4 — Final verdict
+## Step 5 — Final verdict
 
 End with PASS / FAIL. FAIL if any CRITICAL or HIGH finding, including `[Spec]`-tagged.
 
 ## Scoped Subagent Prompt Template
 
-Use this when constructing each scoped subagent's prompt. Replace `{AGENT_GROUP_NAME}`, `{STACK_SUMMARY}`, `{CHECKLIST}`, `{CHANGED_FILES}`, and `{DIFF}`.
+Use this when constructing each scoped subagent's prompt. Replace `{AGENT_GROUP_NAME}`, `{STACK_SUMMARY}`, `{CHECKLIST}`, `{PROJECT_RULES}`, `{CHANGED_FILES}`, and `{DIFF}`.
 
 ```
 You are a specialized TypeScript/React code reviewer focusing EXCLUSIVELY on: {AGENT_GROUP_NAME}.
@@ -98,6 +110,9 @@ STRICT SCOPING: Review ONLY against the checklist items provided below. Other ag
 
 ## Stack Summary & Skip Rules
 {STACK_SUMMARY}
+
+## Project Rules (win over the checklist on conflict)
+{PROJECT_RULES}
 
 ## Changed Files
 {CHANGED_FILES}
@@ -113,7 +128,7 @@ STRICT SCOPING: Review ONLY against the checklist items provided below. Other ag
 
 ## Instructions
 1. Read each changed/new TypeScript file in full (not just the diff).
-2. Check EVERY applicable checklist item against EVERY changed file.
+2. Check EVERY applicable checklist item against EVERY changed file. Apply the Project Rules that fall in your scope with the same weight as checklist items.
 3. For each finding, report:
    - Severity (CRITICAL / HIGH / MEDIUM / LOW)
    - Domain tag in brackets matching checklist section name
@@ -128,18 +143,16 @@ Structural red flags (beyond your checklist): if a change in your files clearly 
 
 ## Clean-Code Subagent Prompt Template
 
-Use this for Agent 6. Replace `{CHANGED_FILES}` and `{DIFF}`.
+Use this for Agent 6. Replace `{CHANGED_FILES}`, `{DIFF}`, `{PROJECT_RULES}`, and `{CLEAN_CODE_FALLBACK}` (inline content of `@../../checklists/ts/clean-code.md`).
 
 ```
 You are a clean-code reviewer focusing EXCLUSIVELY on code clarity and maintainability. Other agents own stack-specific rules, architecture, security, and tests.
 
 First, invoke `athkatla-skills:clean-code` via the Skill tool and apply its standards and severity rubric to the changed files. If the skill is not available, apply this fallback checklist instead:
-- Intention-revealing names for variables, functions, types, files. Flag vague names (data, info, temp, handle, process) and misleading names.
-- Self-explanatory code instead of comments. A comment explaining WHAT the code does is a naming/structure smell; comments only earn their place stating constraints the code cannot express.
-- Declarative / functional style over imperative nesting: early returns over nested if/else chains, map/filter/reduce over index loops where it reads better, no flag-argument branching.
-- Clear structure: one responsibility per function and file; related logic colocated; no grab-bag utils additions.
-- Size: flag functions over ~50 lines and files over ~800 lines, or any function/file the change makes meaningfully harder to follow.
-- DRY: duplicated or near-identical blocks introduced or extended by this change.
+{CLEAN_CODE_FALLBACK}
+
+## Project Rules (win over the fallback on conflict)
+{PROJECT_RULES}
 
 ## Changed Files
 {CHANGED_FILES}

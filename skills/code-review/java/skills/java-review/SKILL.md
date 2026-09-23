@@ -30,12 +30,12 @@ Filter to `.java` and `.groovy` (Spock specs). Keep test resource files (`src/te
 ## Step 2 — Load project context
 
 Read these if they exist:
-- `CLAUDE.md` (root and any nested) — project conventions
-- `.claude/rules/java.md` — additional Java/Spring Boot standards
+- `CLAUDE.md` and `AGENTS.md` (root and any nested) — project conventions
+- Every file in `.claude/rules/` and `.agents/rules/`, and each project skill or doc they route to for Java code, naming, tests, or review
 - Existing test files (e.g. integration test base classes) — current testing patterns
 - Any spec artifact for the current change (see Step 5 below)
 
-Move to Step 3 once every existing item above has been read.
+A project rule wins over a checklist item when they conflict. Move to Step 3 once every existing item above has been read.
 
 ## Step 3 — Walk the checklist
 
