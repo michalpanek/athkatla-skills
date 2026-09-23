@@ -64,10 +64,8 @@ Sections: Logging, Messaging & Events, Async Correctness, Scheduled Jobs, SOAP &
 
 ## Tests
 
-**FIRST-CHECK gate before any style/structure item below:** For every net-new test file or new `@Test` method in this PR, answer *"does this test catch a real bug the compiler / type system / an existing integration test doesn't?"* If the answer is "no" or "only during this one change," flag it as **MEDIUM — propose removal** and STOP evaluating that test against the rest of the checklist (no point grading the style of a test that shouldn't exist). Only proceed to style/structure items for tests that pass the first-check gate.
+**Test value first:** apply `test-value.md` (the value gate, low-signal classes, and missing-coverage stance) before any item below. Grade only the tests that pass the gate.
 
-- [ ] **Low-signal test (propose removal)**: flag any net-new test that only verifies trivial mapping (`from()` round-trip, getter/setter, field-copy through layers), framework behavior (Hibernate writing a column, Jackson (de)serializing a record), or "when I pass X I get X back" plumbing. Project stance: coverage-for-coverage's-sake is not a goal; tests must catch a concrete, recurring failure mode (business logic, branching, validation rules, integration seams). If a test catches nothing the compiler / existing integration tests don't, its correct severity is **MEDIUM — propose removal**, not LOW. When suggesting a replacement, prefer an integration test against real Postgres (`TestPostgresqlContainer`) + MockMvc over a new unit test.
-- [ ] **Do NOT flag "missing test coverage" as an issue** for changes with no business logic to protect (pure mapping edits, nullable column adds, record field additions that pass through unchanged, getter/setter additions). Manual verification is the accepted default in this project for such changes.
 - [ ] **Test cases first, helpers last**: when opening a test file, you see tests immediately, not setup
 - [ ] **`//given //when //then`** sections in every test method
 - [ ] **`@Nested` only with 2+ groups**: don't nest if there's only one group

@@ -26,7 +26,7 @@ git diff HEAD
 
 If `$ARGUMENTS` is provided, treat as diff range or file list. Otherwise default to uncommitted changes on `HEAD`.
 
-Filter to `.java`. If no files match, report "No Java files to review" and stop.
+Filter to `.java` and `.groovy` (Spock specs). Keep test resource files (`src/test/resources/**`) in the changed-files list: the Test Value gate needs the fixtures. If no `.java` or `.groovy` files match, report "No Java files to review" and stop.
 
 ## Step 2 — Dispatch 6 subagents IN PARALLEL
 
@@ -58,15 +58,20 @@ Scope: Logging, Messaging & Events, Async Correctness, Scheduled Jobs, SOAP & Ex
 Checklist:
 @../../checklists/java/04-cross-cutting-concerns.md
 
+Inline the Test Value gate into this agent's checklist too (see "Test Value" below).
+
 ### Agent 5 — Holistic Review (no checklist)
 Scope: cross-file consistency, design coherence, integration points, subtle bugs, spec fidelity.
 Prompt template + axes definition + spec-discovery guidance:
 @../../checklists/java/holistic-pass.md
 
 ### Agent 6 — Clean Code (uses the clean-code skill)
-Scope: readability and maintainability only — intention-revealing naming, self-explanatory code instead of comments, declarative/functional patterns over nested if/else, clear code structure, small focused methods and classes, DRY.
+Scope: readability and maintainability — intention-revealing naming, self-explanatory code instead of comments, declarative/functional patterns over nested if/else, clear code structure, small focused methods and classes, DRY — plus test value: every new test must protect a business rule of the change.
 Prompt template: see "Clean-Code Subagent Prompt Template" at the end of this file.
-Expected overlap with Agent 3's Naming Precision / Code Style items is fine; aggregation keeps both.
+Expected overlap with Agent 3's Naming Precision / Code Style items and Agent 4's Test Value findings is fine; aggregation keeps both.
+
+### Test Value (Agents 4 and 6)
+@../../checklists/java/test-value.md
 
 ### Severity guidelines (all agents)
 @../../checklists/java/severity-guidelines.md
@@ -74,10 +79,10 @@ Expected overlap with Agent 3's Naming Precision / Code Style items is fine; agg
 ## Step 3 — Aggregate results
 
 After all 6 agents return:
-1. Collect findings from all agents (including `[Holistic]`, `[Spec]`, and `[Clean Code]` insights)
+1. Collect findings from all agents (including `[Holistic]`, `[Spec]`, `[Clean Code]`, and `[Test Value]` insights)
 2. Number sequentially starting from 1
 3. Group by severity: CRITICAL > HIGH > MEDIUM > LOW
-4. Tag each finding with its domain in brackets. Preserve `[Holistic]`, `[Spec]`, `[Structure]`, and `[Clean Code]` tags verbatim.
+4. Tag each finding with its domain in brackets. Preserve `[Holistic]`, `[Spec]`, `[Structure]`, `[Clean Code]`, and `[Test Value]` tags verbatim.
 5. Do NOT aggressively deduplicate. When in doubt, INCLUDE the finding.
 6. Keep both versions when a holistic finding overlaps with a checklist finding.
 
@@ -110,7 +115,7 @@ STRICT SCOPING: Review ONLY against the checklist items provided below. Do NOT r
 <inline content of @../../checklists/java/severity-guidelines.md>
 
 ## Instructions
-1. Read each changed/new Java file in full (not just the diff).
+1. Read each changed/new Java or Groovy file in full (not just the diff).
 2. Check EVERY applicable checklist item against EVERY changed file.
 3. For each finding, report:
    - Severity (CRITICAL / HIGH / MEDIUM / LOW)
@@ -126,18 +131,13 @@ Structural red flags (beyond your checklist): if a change in your files clearly 
 
 ## Clean-Code Subagent Prompt Template
 
-Use this for Agent 6. Replace `{CHANGED_FILES}` and `{DIFF}`.
+Use this for Agent 6. Replace `{CHANGED_FILES}`, `{DIFF}`, `{CLEAN_CODE_FALLBACK}` (inline content of `@../../checklists/java/clean-code.md`), and `{TEST_VALUE}` (inline content of `@../../checklists/java/test-value.md`).
 
 ```
-You are a clean-code reviewer focusing EXCLUSIVELY on code clarity and maintainability. You do NOT review stack-specific rules, architecture, security, or tests — other agents own those.
+You are a clean-code reviewer focusing EXCLUSIVELY on code clarity, maintainability, and test value. Stack-specific rules, architecture, security, and test style belong to other agents.
 
 First, invoke the `clean-code` skill via the Skill tool and apply its standards and severity rubric to the changed files. If the skill is not available, apply this fallback checklist instead:
-- Intention-revealing names for variables, methods, classes, packages. Flag vague names (data, info, temp, handle, process, Manager, Util) and misleading names.
-- Self-explanatory code instead of comments. A comment explaining WHAT the code does is a naming/structure smell; comments only earn their place stating constraints the code cannot express (and Javadoc on public API).
-- Declarative / functional style over imperative nesting: early returns / guard clauses over nested if/else chains, Streams or Vavr over index loops where it reads better, no flag-argument branching.
-- Clear structure: one responsibility per method and class; related logic colocated; no grab-bag utils additions.
-- Size: flag methods over ~50 lines and classes over ~800 lines, or any method/class the change makes meaningfully harder to follow.
-- DRY: duplicated or near-identical blocks introduced or extended by this change.
+{CLEAN_CODE_FALLBACK}
 
 ## Changed Files
 {CHANGED_FILES}
@@ -145,18 +145,22 @@ First, invoke the `clean-code` skill via the Skill tool and apply its standards 
 ## Full Diff
 {DIFF}
 
+## Test Value
+{TEST_VALUE}
+
 ## Severity Guidelines
 <inline content of @../../checklists/java/severity-guidelines.md>
 
 ## Instructions
-1. Read each changed/new Java file in full (not just the diff).
+1. Read each changed/new Java or Groovy file in full (not just the diff).
 2. Judge only what this change introduces or worsens; do not demand refactors of untouched legacy code.
-3. For each finding, report:
+3. Run the Test Value gate on every new test in the change. For each test, name the business rule it protects, or flag it for removal.
+4. For each finding, report:
    - Severity (CRITICAL / HIGH / MEDIUM / LOW)
-   - Tag `[Clean Code]`
+   - Tag `[Clean Code]`, or `[Test Value]` for gate findings
    - File path and line number
    - Issue description naming the violated principle
    - Suggested fix (show the cleaner version when short)
-4. Group findings by severity.
-5. If no issues found, report "No issues found in Clean Code".
+5. Group findings by severity.
+6. If no issues found, report "No issues found in Clean Code".
 ```
