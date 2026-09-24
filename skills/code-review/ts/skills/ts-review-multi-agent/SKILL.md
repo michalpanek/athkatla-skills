@@ -77,7 +77,7 @@ Prompt template + axes definition + spec-discovery guidance:
 ### Agent 6 — Clean Code (uses `athkatla-skills:clean-code`)
 Scope: readability and maintainability only — intention-revealing naming, self-explanatory code instead of comments, declarative/functional patterns over nested if/else, clear code structure, small focused functions and files, DRY.
 Prompt template: see "Clean-Code Subagent Prompt Template" at the end of this file.
-Expected overlap with Agent 2's Naming Precision / Code Style items is fine; aggregation keeps both.
+Agent 6 owns the comment review scan. Expected overlap with Agent 2's Naming Precision / Code Style items is fine; aggregation keeps both.
 
 ### Severity guidelines (all agents)
 @../../checklists/ts/severity-guidelines.md
@@ -135,15 +135,15 @@ STRICT SCOPING: Review ONLY against the checklist items provided below. Other ag
    - File path and line number
    - Issue description referencing the specific checklist rule
    - Suggested fix
-4. Group findings by severity.
-5. If no issues found in your scope, report "No issues found in {AGENT_GROUP_NAME}".
+5. Group findings by severity.
+6. If no issues found in your scope, report "No issues found in {AGENT_GROUP_NAME}".
 
 Structural red flags (beyond your checklist): if a change in your files clearly worsens structure — sprawls a file well past ~1000 lines, bolts a special-case branch onto an unrelated flow, or adds a wrapper / abstraction that only relocates complexity — note it briefly tagged `[Structure]`, even though it is outside your scoped items. Keep this to genuine structural problems, not style; the holistic agent owns the deep structural pass.
 ```
 
 ## Clean-Code Subagent Prompt Template
 
-Use this for Agent 6. Replace `{CHANGED_FILES}`, `{DIFF}`, `{PROJECT_RULES}`, and `{CLEAN_CODE_FALLBACK}` (inline content of `@../../checklists/ts/clean-code.md`).
+Use this for Agent 6. Replace `{CHANGED_FILES}`, `{DIFF}`, `{PROJECT_RULES}`, `{CLEAN_CODE_FALLBACK}` (inline content of `@../../checklists/ts/clean-code.md`), and `{COMMENT_RULES}` (inline content of `@../../../clean-code/skills/clean-code/references/comments.md`).
 
 ```
 You are a clean-code reviewer focusing EXCLUSIVELY on code clarity and maintainability. Other agents own stack-specific rules, architecture, security, and tests.
@@ -160,13 +160,17 @@ First, invoke `athkatla-skills:clean-code` via the Skill tool and apply its stan
 ## Full Diff
 {DIFF}
 
+## Comments
+{COMMENT_RULES}
+
 ## Severity Guidelines
 <inline content of @../../checklists/ts/severity-guidelines.md>
 
 ## Instructions
 1. Read each changed/new file in full (not just the diff).
 2. Judge only what this change introduces or worsens; do not demand refactors of untouched legacy code.
-3. For each finding, report:
+3. Run the Comments review scan on every comment line the change adds or edits, tests included.
+4. For each finding, report:
    - Severity (CRITICAL / HIGH / MEDIUM / LOW)
    - Tag `[Clean Code]`
    - File path and line number

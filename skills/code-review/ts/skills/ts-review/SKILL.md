@@ -61,6 +61,9 @@ Apply every applicable item from each section against every changed file. Read e
 Invoke `athkatla-skills:clean-code` via the Skill tool. Apply its standards and severity rubric to every changed file. Judge only what this change introduces or worsens. If the skill is not available, apply this fallback:
 @../../checklists/ts/clean-code.md
 
+Then run the comment review scan on every comment line the change adds or edits, tests included. Implementer agents add comments in bulk, so expect many.
+@../../../clean-code/skills/clean-code/references/comments.md
+
 Tag findings `[Clean Code]`.
 
 ## Step 5 — Holistic Pass (Standards + Spec axes)

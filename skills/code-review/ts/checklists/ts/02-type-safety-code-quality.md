@@ -53,7 +53,7 @@
 - [ ] **Inline types only**: no standalone `interface` or `type` declarations unless shared across files
 - [ ] **Wrap if statements in braces**: even single-line bodies. Shortened notation leads to misunderstandings
 - [ ] **Early returns over if/else chains**: invert condition, return early, reduce nesting. Also use early returns for loading/error states in components instead of nested ternaries `something ? <loader /> : error ? <error /> : <component />`
-- [ ] **No redundant comments**: code should be self-documenting through naming. Adding comments assumes someone will update both code and comment, and that never works out. TypeScript + IntelliSense are expressive enough
+- [ ] **Comments earn their place**: a comment states only what the code cannot show (a business rule, an outside constraint, a deliberate choice that looks like a mistake, a strange test setup). Nothing verifies a comment, so it drifts from the code. Flag work history, review discussion, and restatements of the code. The clean-code pass owns the full scan (`comments.md`)
 - [ ] **Immutability (CRITICAL)**: never use `let` (first code smell suggesting mutation). Never use `.push()` (mutates array keeping reference). Use composition: place conditions as ternary when creating objects, not create-then-mutate. `.map()` callbacks must be pure functions (no side effects, no mutating outer scope)
 - [ ] **DRY at 3+ repetitions**: extract helper function when same code appears 3+ times. Also extract shared logic between similar methods
 - [ ] **No test/debug values in production code**: no hardcoded test IDs or temporary values
@@ -85,7 +85,6 @@
 - [ ] **`Promise.all` for independent async operations**: when two async calls don't depend on each other, run them concurrently. Note: `Promise.all` is concurrent (single-threaded event loop), not truly parallel
 - [ ] **`shift()` mutates the original array**: use `array[0]` and `array.slice(1)` instead
 - [ ] **Every TODO must link to a ticket per project convention**: TODOs without a tracker reference get lost. Use your project's tracker format (Jira `ABC-123`, Linear `ENG-456`, GitHub `#789`, etc.) consistently.
-- [ ] **Persistent notes in code, questions in PR comments**: code comments should be lasting notes. Questions about design belong in PR review comments, not committed code
 - [ ] **Feature flags should be simple booleans**: `const featureEnabled = false // TODO: PROJ-123` is enough. Don't overengineer toggle systems for pre-release features
 - [ ] **Validate env vars at startup with Zod**: never use `process.env` directly. Missing vars passed as `undefined` to modules cause hard-to-track runtime errors. Use a centralized `env.ts` with Zod validation
 - [ ] **Sanitize user input before RegExp**: unsanitized input in `new RegExp(userInput)` enables ReDoS attacks

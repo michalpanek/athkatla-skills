@@ -7,7 +7,7 @@ Sections: Code Style, Naming Precision, Java Type & Optional Patterns, Validatio
 - [ ] **No if/else chains**: use early returns instead
 - [ ] **No overengineering**: if a collection has 2-3 items max, use a plain list, not a Map or Set
 - [ ] **YAGNI**: don't build abstractions or optimizations that aren't needed yet
-- [ ] **No redundant comments**: code should be self-explanatory through naming and structure
+- [ ] **Comments earn their place**: a comment states only what the code cannot show (a business rule, an outside constraint, a deliberate choice that looks like a mistake, a strange test setup). Flag work history, review discussion, and restatements of the code. The clean-code pass owns the full scan (`comments.md`)
 - [ ] **Use `var` when type is obvious** from RHS; explicit type when not (e.g. decryption results, complex return types)
 - [ ] **`var` demands extra-precise naming**: since the type is inferred, the variable name must compensate for the missing type hint. In a `for (var x : collection)` loop, `emailData` is self-explanatory while `data` is ambiguous. The parameter should also be named distinctly: `emailsData` (plural) for the list, `emailData` (singular) for the loop variable.
 - [ ] **Use imports** instead of full package paths (e.g. `DataContext.TEST_MODE` not `com.example.common.model.DataContext.TEST_MODE`)

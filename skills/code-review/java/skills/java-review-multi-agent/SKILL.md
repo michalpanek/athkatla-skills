@@ -79,7 +79,7 @@ Prompt template + axes definition + spec-discovery guidance:
 ### Agent 6 — Clean Code (uses `athkatla-skills:clean-code`)
 Scope: readability, maintainability, and test value. Rules live in the clean-code and test-value checklists (see the prompt template below), not here.
 Prompt template: see "Clean-Code Subagent Prompt Template" at the end of this file.
-Agent 6 also owns the method-naming rule (methods start with a verb), which Agent 3 checks too. Expected overlap with Agent 3's Naming Precision / Code Style items and Agent 4's Test Value findings is fine; aggregation keeps both.
+Agent 6 also owns the method-naming rule (methods start with a verb) and the comment review scan; Agent 3 checks both too. Expected overlap with Agent 3's Naming Precision / Code Style items and Agent 4's Test Value findings is fine; aggregation keeps both.
 
 ### Test Value (Agents 4 and 6)
 @../../checklists/java/test-value.md
@@ -145,7 +145,7 @@ Structural red flags (beyond your checklist): if a change in your files clearly 
 
 ## Clean-Code Subagent Prompt Template
 
-Use this for Agent 6. Replace `{CHANGED_FILES}`, `{DIFF}`, `{PROJECT_RULES}`, `{CLEAN_CODE_FALLBACK}` (inline content of `@../../checklists/java/clean-code.md`), `{TEST_VALUE}` (inline content of `@../../checklists/java/test-value.md`), and `{METHOD_NAMING}` (inline the "Methods start with a verb" item from `@../../checklists/java/03-code-quality-type-safety.md` § Naming Precision).
+Use this for Agent 6. Replace `{CHANGED_FILES}`, `{DIFF}`, `{PROJECT_RULES}`, `{CLEAN_CODE_FALLBACK}` (inline content of `@../../checklists/java/clean-code.md`), `{TEST_VALUE}` (inline content of `@../../checklists/java/test-value.md`), `{METHOD_NAMING}` (inline the "Methods start with a verb" item from `@../../checklists/java/03-code-quality-type-safety.md` § Naming Precision), and `{COMMENT_RULES}` (inline content of `@../../../clean-code/skills/clean-code/references/comments.md`).
 
 ```
 You are a clean-code reviewer focusing EXCLUSIVELY on code clarity, maintainability, and test value. Stack-specific rules, architecture, security, and test style belong to other agents.
@@ -168,6 +168,9 @@ First, invoke `athkatla-skills:clean-code` via the Skill tool and apply its stan
 ## Method Naming
 {METHOD_NAMING}
 
+## Comments
+{COMMENT_RULES}
+
 ## Severity Guidelines
 <inline content of @../../checklists/java/severity-guidelines.md>
 
@@ -176,12 +179,13 @@ First, invoke `athkatla-skills:clean-code` via the Skill tool and apply its stan
 2. Judge only what this change introduces or worsens; do not demand refactors of untouched legacy code.
 3. Run the Test Value gate on every new test in the change (Test Value section above).
 4. Check every new or renamed method name against the Method Naming rule above. Tag findings `[Clean Code]`.
-5. For each finding, report:
+5. Run the Comments review scan on every comment line the change adds or edits, tests included. Tag findings `[Clean Code]`.
+6. For each finding, report:
    - Severity (CRITICAL / HIGH / MEDIUM / LOW)
    - Tag `[Clean Code]`, or `[Test Value]` for gate findings
    - File path and line number
    - Issue description naming the violated principle
    - Suggested fix (show the cleaner version when short)
-6. Group findings by severity.
-7. If no issues found, report "No issues found in Clean Code".
+7. Group findings by severity.
+8. If no issues found, report "No issues found in Clean Code".
 ```

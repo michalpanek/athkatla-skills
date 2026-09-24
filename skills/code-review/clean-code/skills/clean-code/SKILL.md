@@ -327,28 +327,9 @@ try {
 
 ## Part VIII: Comments
 
-**Self-documenting code first. Comments explain WHY, not WHAT.**
+**The default is no comment.** Before you write one, rename, extract, restructure, or write a test. A comment states only what the code cannot show: a business rule, a constraint from outside the code, a deliberate choice that looks like a mistake, or a strange test setup. Work history and review discussion go to the commit message or the pull request.
 
-```typescript
-// ❌ BAD: Explains what
-// Loop through items and add prices
-for (const item of items) { total += item.price; }
-
-// ❌ BAD: Compensates for bad naming
-// Check if user can access admin panel
-if (u.r === 1) { ... }
-
-// ✅ GOOD: Explains business rule
-// VAT is calculated at checkout per finance requirement FR-2341
-const subtotal = items.reduce((sum, i) => sum + i.price, 0);
-
-// ✅ GOOD: Explains non-obvious decision
-// Insertion sort: arrays typically <10 items, beats quicksort at small n
-insertionSort(items);
-```
-
-**Appropriate:** business rules, legal/compliance, consequence warnings, non-obvious decisions, API docs.
-**Inappropriate:** explaining what code does, compensating for naming, commented-out code, TODOs without ticket.
+When you write, edit, or review a comment, read `references/comments.md`: the full rule, the shape, and the review scan with its verdicts.
 
 ### Replace the comment with a name
 
@@ -392,6 +373,7 @@ A comment that restates the next line is dead weight. A comment that decodes a c
 | `if` after `if` of preconditions | Stacked guard clauses + early return |
 | Comment restates the next line | Delete it |
 | Comment explains a cryptic name | Rename the symbol |
+| Comment tells review history or what a test verified | Move to the commit message or pull request; delete |
 | Function named by mechanism (`loadJsonAsync`) | Rename to intent (`loadCountryOptions`) |
 | Can't understand a line without scrolling elsewhere | Extract + rename until it reads locally |
 
@@ -413,7 +395,6 @@ A comment that restates the next line is dead weight. A comment that decodes a c
 | Add 30th line to function | Extract a method? |
 | Name variable `data` or `result` | What does this represent? |
 | Write `catch (e) { }` | What should happen on error? |
-| Write comment explaining code | Can I rename to make it obvious? |
 | Nest 4th level of conditions | Early returns? Extract? |
 | Mutate a parameter | Return a new value instead |
 | Type a parameter as `T[]` / `Array<T>` | Use `ReadonlyArray<T>` unless mutation is intentional |
@@ -446,4 +427,5 @@ A comment that restates the next line is dead weight. A comment that decodes a c
 | "It's only two copies" | Two become three. Unify at the second; the third never gets cheaper. |
 | "The copies might diverge later" | Divergence is a new parameter, not a fork. Parameterize; split only if they truly diverge. |
 | "The comment explains it fine" | Comments drift; names don't. If it needs a comment to read, rename or extract. |
+| "The reviewer asked for more explanation" | Answer with a rename, an extraction, or a test. Add a comment only when all three fail, in one or two lines. |
 | "ifs after ifs are clearer" | A chain on one value is a table in disguise. The table is shorter and extensible. |

@@ -172,3 +172,4 @@ Beyond the Execution Model above:
 | PR pushes a file past ~1000 lines | decompose first — extract modules / components / helpers |
 | special-case `if` bolted onto an unrelated flow | move behind a helper / dispatch table / state model |
 | thin wrapper / pass-through helper adding no clarity | inline it; keep the direct flow |
+| comment that tells review history, restates the code, or describes what a test verified | rename, extract, or test; history goes to the PR description |

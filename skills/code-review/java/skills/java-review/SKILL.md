@@ -61,6 +61,9 @@ Invoke `athkatla-skills:clean-code` via the Skill tool. Apply its standards and 
 Then run the Test Value gate on every new test in the change. A test that fails the gate gets only the removal finding: drop its Step 3 test-style findings.
 @../../checklists/java/test-value.md
 
+Run the comment review scan on every comment line the change adds or edits, tests included. Implementer agents add comments in bulk, so expect many.
+@../../../clean-code/skills/clean-code/references/comments.md
+
 Check every new or renamed method name against the "Methods start with a verb" item in Naming Precision (Step 3, `03-code-quality-type-safety.md`). Reviewers report this miss often.
 
 Tag findings `[Clean Code]` or `[Test Value]`.
