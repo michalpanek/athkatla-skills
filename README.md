@@ -25,7 +25,7 @@ One plugin ships every skill. Invoke a skill as `/athkatla-skills:<skill-name>`,
 | Docs | `docs` | Documentation conventions (skeletal) |
 | Productivity | `productivity` | Non-code workflows (skeletal) |
 | Productivity | `spade-it` | Facilitate a full S.P.A.D.E. decision session for hard contested decisions |
-| Productivity | `show-me` | Show the current topic visually and re-pitch it in simple English, grounded in the ticket |
+| Productivity | `show-me` | Show the current topic visually and re-pitch it in simple English, grounded in the ticket (adapted from HumanLayer `show-me` and Matt Pocock `wait-what`, see Credits) |
 | UX | `ux-site-mapper`, `ux-ui-auditor` | Systemic UX/UI audit for Next.js apps: route mapping + principles-based audit (auto-trigger) |
 | Meta | `optimize-agent-md` | Audit + split a monolithic `CLAUDE.md` / `AGENTS.md` / `GEMINI.md` into a router + per-area files |
 | Meta | `promote-rules-to-skills` | Promote `.claude/rules/*.md` into auto-discoverable skills |
@@ -79,6 +79,14 @@ Common pitfalls:
 ## Credits
 
 Thanks to [@abankowski](https://github.com/abankowski) for the `ux-audit` skills (`ux-site-mapper` + `ux-ui-auditor`) — created with his help.
+
+Thanks to [HumanLayer](https://github.com/humanlayer/skills) and to [Matt Pocock](https://github.com/mattpocock/skills) from [AI Hero](https://www.aihero.dev) for the ideas behind `show-me`:
+
+- The visual shapes (pseudocode, call trees, component and file trees, Mermaid, `diff` views, focused HTML files) come from HumanLayer's [`show-me`](https://github.com/humanlayer/skills/tree/main/plugins/show-me) skill.
+- The re-pitch contract (a short description, simple steps, ASD-STE100 Simplified Technical English, names from `CONTEXT.md`) builds on Matt Pocock's [`wait-what`](https://github.com/mattpocock/skills/tree/main/skills/productivity/wait-what) skill.
+- This repo adds the context step (GitHub PR and Jira ticket, or ask for the requirements), the completion check, and small wording changes.
+
+Both sources are MIT licensed: `show-me` is Copyright (c) 2026 HumanLayer, `wait-what` is Copyright (c) 2026 Matt Pocock. Their license terms apply to the adapted parts.
 
 ## License
 
