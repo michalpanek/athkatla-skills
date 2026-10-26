@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- title slot: the topic, two to five words -->
+  <title>{{title}}</title>
+  <link rel="stylesheet" media="(prefers-color-scheme: light)" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/styles/github.min.css" integrity="sha384-eFTL69TLRZTkNfYZOLM+G04821K1qZao/4QLJbet1pP4tcF+fdXq/9CdqAbWRl/L" crossorigin="anonymous">
+  <link rel="stylesheet" media="(prefers-color-scheme: dark)" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/styles/github-dark.min.css" integrity="sha384-wH75j6z1lH97ZOpMOInqhgKzFkAInZPPSPlZpYKYTOqsaizPvhQZmAtLcPKXpLyH" crossorigin="anonymous">
+  <style>
+    :root {
+      --bg: #fafaf9; --surface: #ffffff; --text: #1c1917; --muted: #57534e;
+      --border: #e7e5e4; --accent: #2563eb; --accent-soft: #dbeafe;
+      --add: #dcfce7; --del: #fee2e2;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0c0a09; --surface: #1c1917; --text: #f5f5f4; --muted: #a8a29e;
+        --border: #292524; --accent: #60a5fa; --accent-soft: #1e3a8a;
+        --add: #14532d; --del: #7f1d1d;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; background: var(--bg); color: var(--text);
+      font: 17px/1.6 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+    main { max-width: 860px; margin: 0 auto; padding: 48px 16px 96px; }
+    h1 { font-size: 2rem; line-height: 1.2; margin: 0 0 16px; }
+    h2 { font-size: 1.25rem; margin: 0 0 12px; }
+    .lead { font-size: 1.15rem; color: var(--muted); margin: 0 0 32px; }
+    section, .steps-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 24px; margin: 0 0 24px;
+    }
+    .steps { counter-reset: step; list-style: none; padding: 0; margin: 0; }
+    .steps li {
+      counter-increment: step; position: relative;
+      padding: 0 0 12px 44px; min-height: 32px;
+    }
+    .steps li::before {
+      content: counter(step); position: absolute; left: 0; top: 0;
+      width: 30px; height: 30px; border-radius: 50%;
+      background: var(--accent-soft); color: var(--accent);
+      display: grid; place-items: center; font-weight: 600; font-size: .9rem;
+    }
+    pre {
+      margin: 12px 0 0; padding: 16px; overflow-x: auto;
+      border: 1px solid var(--border); border-radius: 8px;
+      font: 14px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace;
+    }
+    pre code.hljs { padding: 0; background: transparent; }
+    pre.mermaid { background: var(--surface); text-align: center; }
+    .hljs-addition { background: var(--add); display: inline-block; width: 100%; }
+    .hljs-deletion { background: var(--del); display: inline-block; width: 100%; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .9em; }
+    p code { background: var(--accent-soft); padding: 1px 6px; border-radius: 4px; }
+    .chip {
+      display: inline-block; margin: 4px 6px 4px 0; padding: 2px 10px;
+      border: 1px solid; border-radius: 999px; font-size: .85rem;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>{{title}}</h1>
+    <!-- description slot: two or three sentences; what the thing is and why it matters to the user's question -->
+    <p class="lead">{{description}}</p>
+
+    <div class="steps-card">
+      <h2>Steps</h2>
+      <ol class="steps">
+        <!-- steps slot: one <li> per step, one action per step -->
+        {{steps}}
+      </ol>
+    </div>
+
+    <!-- sections slot: one <section> per shape, for example:
+    <section>
+      <h2>Call tree</h2>
+      <p>Short text that the shape supports.</p>
+      <pre><code class="language-diff">…escaped source…</code></pre>
+    </section>
+    -->
+    {{sections}}
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/highlight.min.js" integrity="sha384-GdEWAbCjn+ghjX0gLx7/N1hyTVmPAjdC2OvoAA0RyNcAOhqwtT8qnbCxWle2+uJX" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11.4.1/dist/mermaid.min.js" integrity="sha384-rbtjAdnIQE/aQJGEgXrVUlMibdfTSa4PQju4HDhN3sR2PmaKFzhEafuePsl9H/9I" crossorigin="anonymous"></script>
+  <script>
+    hljs.highlightAll();
+    const dark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+    // Node classes from the data flow table: [label, light style, dark style]
+    const nodeClasses = {
+      source: ["source / input", "fill:#dbeafe,stroke:#2563eb,color:#1e3a8a", "fill:#172554,stroke:#60a5fa,color:#dbeafe"],
+      process: ["process / file", "fill:#ffffff,stroke:#78716c,color:#1c1917", "fill:#292524,stroke:#a8a29e,color:#f5f5f4"],
+      store: ["store", "fill:#fef3c7,stroke:#d97706,color:#78350f", "fill:#451a03,stroke:#f59e0b,color:#fef3c7"],
+      external: ["external", "fill:#f5f5f4,stroke:#a8a29e,color:#57534e,stroke-dasharray:4 3", "fill:#1c1917,stroke:#78716c,color:#a8a29e,stroke-dasharray:4 3"],
+      changed: ["changed in this task", "fill:#dcfce7,stroke:#16a34a,color:#14532d,stroke-width:2.5px", "fill:#052e16,stroke:#4ade80,color:#dcfce7,stroke-width:2.5px"],
+      new: ["new in this task", "fill:#dcfce7,stroke:#16a34a,color:#14532d,stroke-width:2.5px,stroke-dasharray:5 3", "fill:#052e16,stroke:#4ade80,color:#dcfce7,stroke-width:2.5px,stroke-dasharray:5 3"],
+    };
+    const styleOf = ([, light, darkStyle]) => (dark ? darkStyle : light);
+    const classDefs = Object.entries(nodeClasses)
+      .map(([name, entry]) => `    classDef ${name} ${styleOf(entry)}`)
+      .join("\n");
+
+    const flowcharts = [...document.querySelectorAll("pre.mermaid")]
+      .filter((pre) => /^\s*(flowchart|graph)\b/.test(pre.textContent));
+    flowcharts.forEach((pre) => { pre.textContent = `${pre.textContent}\n${classDefs}`; });
+
+    const usedClasses = Object.keys(nodeClasses)
+      .filter((name) => flowcharts.some((pre) => pre.textContent.includes(`:::${name}`)));
+    const chipStyle = (style) => style.replace(/fill:/, "background:").replace(/stroke:/, "border-color:")
+      .replace(/stroke-width:/, "border-width:").replace(/stroke-dasharray:[^,]+/, "border-style:dashed").replace(/,/g, ";");
+    if (usedClasses.length > 0) {
+      const legend = document.createElement("section");
+      legend.innerHTML = "<h2>Colour key</h2><p>" + usedClasses
+        .map((name) => `<span class="chip" style="${chipStyle(styleOf(nodeClasses[name]))}">${nodeClasses[name][0]}</span>`)
+        .join("") + "</p>";
+      (flowcharts[0].closest("section") ?? flowcharts[0]).before(legend);
+    }
+
+    const palette = dark
+      ? { primaryColor: "#292524", primaryTextColor: "#f5f5f4", primaryBorderColor: "#57534e", lineColor: "#a8a29e", clusterBkg: "#0c0a09", clusterBorder: "#44403c", edgeLabelBackground: "#1c1917" }
+      : { primaryColor: "#ffffff", primaryTextColor: "#1c1917", primaryBorderColor: "#78716c", lineColor: "#78716c", clusterBkg: "#fafaf9", clusterBorder: "#d6d3d1", edgeLabelBackground: "#ffffff" };
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: "base",
+      flowchart: { useMaxWidth: false, curve: "basis", padding: 12 },
+      themeVariables: { ...palette, fontFamily: "ui-sans-serif, system-ui", fontSize: "15px" },
+    });
+  </script>
+</body>
+</html>
