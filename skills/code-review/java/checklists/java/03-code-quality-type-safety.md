@@ -8,11 +8,13 @@ Sections: Code Style, Naming Precision, Java Type & Optional Patterns, Validatio
 - [ ] **No overengineering**: if a collection has 2-3 items max, use a plain list, not a Map or Set
 - [ ] **YAGNI**: don't build abstractions or optimizations that aren't needed yet
 - [ ] **Comments earn their place**: a comment states only what the code cannot show (a business rule, an outside constraint, a deliberate choice that looks like a mistake, a strange test setup). Flag work history, review discussion, and restatements of the code. The clean-code pass owns the full scan (`comments.md`)
-- [ ] **Use `var` when type is obvious** from RHS; explicit type when not (e.g. decryption results, complex return types)
+- [ ] **Use `var` when type is obvious** from RHS; explicit type when not (e.g. decryption results, complex return types). A `var` assigned from an accessor takes the accessor's name: `var insuranceInformation = holder.insuranceInformation()`.
 - [ ] **`var` demands extra-precise naming**: since the type is inferred, the variable name must compensate for the missing type hint. In a `for (var x : collection)` loop, `emailData` is self-explanatory while `data` is ambiguous. The parameter should also be named distinctly: `emailsData` (plural) for the list, `emailData` (singular) for the loop variable.
 - [ ] **Use imports** instead of full package paths (e.g. `DataContext.TEST_MODE` not `com.example.common.model.DataContext.TEST_MODE`)
 - [ ] **Unused constructors, fields, and imports removed**
 - [ ] **Blank lines between logical groups** in dense methods: separate variable declarations, setter blocks, and conditional groups for readability
+- [ ] **One construction style per feature**: switch between builder and positional constructor for the whole feature or not at all.
+- [ ] **Sentinel values keep one meaning**: a "not applicable" marker means the field does not apply. A missing value in a field that applies stays empty. Fill defaults first, then apply overrides, in the same order across sibling services.
 - [ ] **Extract duplicate overloads**: when multiple overloads have identical bodies, create a shared interface or common method
 - [ ] **DRY at 3+ repetitions**: extract helper method when the same code appears 3+ times
 - [ ] **No test/debug values in production code**: no hardcoded test IDs, test endpoints, or temporary values left behind
@@ -23,7 +25,7 @@ Sections: Code Style, Naming Precision, Java Type & Optional Patterns, Validatio
 - [ ] **Semantic mapping accuracy**: verify domain concepts match between source and target (nationality != country of address)
 - [ ] **Time-based logic scrutinized**: token expiration, timezone handling, `plusHours()`/`plusMinutes()` must be thoroughly tested. Off-by-one time errors cause intermittent failures.
 - [ ] **Shared executor logic extracted**: when multiple Order executors share identical logic, it belongs in a common helper, not duplicated
-- [ ] **Pass only needed values**: if a method needs one field from an object, pass the field, not the full object
+- [ ] **Pass only needed values**: if a method needs one field from an object, pass the field, not the full object. A validation rule takes the smallest value it checks, not the whole provider block, so other providers can reuse it.
 - [ ] **Utility vs Service**: stateless transformation logic without dependencies should be static utility methods, not injected `@Service`
 - [ ] **No fixed-count assumptions**: `if (provider == A) ... else ...` assumes only two providers. Use polymorphism (strategy pattern with executor classes).
 - [ ] **No generated/binary files committed**: `.pdf`, `.bat`, build outputs must be in `.gitignore`
@@ -32,11 +34,11 @@ Sections: Code Style, Naming Precision, Java Type & Optional Patterns, Validatio
 - [ ] **Single responsibility**: method named `saveX` must not delete. "and" in method names = consider splitting.
 - [ ] **Same abstraction level**: if method has 3 private method calls + 1 inline stream, extract the inline part too
 - [ ] **Interfaces for types**: `Map` not `HashMap`, `List` not `ArrayList` in parameters and return types
-- [ ] **Boolean naming**: `isValid()` not `checkIfNotValid()`. No "not" in method names.
+- [ ] **Boolean naming**: `isValid()` not `checkIfNotValid()`. No "not" in method names. Invert a negated predicate inside the method so callers read positively: `!shouldSkipX()` becomes `canIncludeX()`.
 - [ ] **`Objects.equals()` for null-safe comparisons**: not manual null checks before `.equals()`
 - [ ] **No reuse of request classes as intermediaries**: create dedicated records for processing steps
 - [ ] **Strategy pattern for provider logic**: each provider gets its own executor class. Only use switch for simple, non-extensible mappings.
-- [ ] **Dead code removed**: unused methods, variables, exceptions, commented-out pom.xml deps, purposeless package-info files
+- [ ] **Dead code removed**: unused methods, variables, exceptions, repositories, duplicate methods, commented-out pom.xml deps, purposeless package-info files. After a contract change, check that each class the change touched is still needed.
 - [ ] **Entity fields private**: use `@Getter`/`@Setter`, never leave fields package-private by accident
 - [ ] **Use `this.` for class fields in lambdas**: when accessing class fields inside lambdas or inner methods, prefix with `this.` for readability (e.g. `this.orderItems.forEach(...)`)
 - [ ] **Full names in lambda parameters**: use `result` not `r`, `recipient` not `rec`. Lambda parameters should be as readable as regular variables.
@@ -51,7 +53,7 @@ Sections: Code Style, Naming Precision, Java Type & Optional Patterns, Validatio
 - [ ] **Avoid boolean method parameters**: use named methods instead (e.g., `notInApp()` instead of `setInApp(false)`)
 - [ ] **Don't extract single-use private methods**: if called exactly once and won't be reused, inline it
 - [ ] **Combine multiple stream operations into a single pass**: avoid iterating the same collection twice for separate filter operations
-- [ ] **Extract guard clause into the method itself**: when all callers repeat the same pre-check, move the guard inside the method
+- [ ] **Extract guard clause into the method itself**: when all callers repeat the same pre-check, move the guard inside the method. A null check on a factory's input belongs in the `from()` factory, not in each caller.
 - [ ] **Skip DB writes when no actual change**: return `Optional.empty()` if state didn't change, callers use `.ifPresent(this::save)`
 - [ ] **Silent fallbacks hide bugs**: when handling "impossible" states, log a warning rather than silently returning a safe default
 - [ ] **Stream `peek()` is for debugging only**: never use `peek()` for production side effects. Use `map()` or `forEach()`
@@ -65,7 +67,7 @@ Sections: Code Style, Naming Precision, Java Type & Optional Patterns, Validatio
 - [ ] **Declare variables close to first use**: not at the top of the method before a try block
 - [ ] **Extract complex lambdas to named private methods**: for readability and debuggability when things go wrong
 - [ ] **No unnecessary casting**: don't cast to a type when the expression already returns it
-- [ ] **Remove `@Builder` if builder pattern is never used** in that class
+- [ ] **Remove `@Builder` if builder pattern is never used** in that class, and `toBuilder = true` when nothing calls `toBuilder()`
 - [ ] **Don't shadow stdlib classes**: don't define your own `Date` when `java.time.LocalDate` suffices
 - [ ] **Remove default annotation attributes**: `required = true` is the default for `@RequestParam`, don't write it
 - [ ] **`EnumMap<Provider, Executor>` for O(1) routing**: use `EnumMap` for provider-to-executor dispatch, not if/else chains or HashMap
@@ -79,9 +81,14 @@ Sections: Code Style, Naming Precision, Java Type & Optional Patterns, Validatio
 - [ ] **MDC utility methods use consistent naming**: `addXToLogs` / `removeXFromLogs` pattern for all MDC context methods.
 - [ ] **Notification/UI field naming**: prefix with an application-specific identifier only for internal values. External values should not carry application prefixes.
 - [ ] **No generic names**: prefer `deletionThresholdDate` over `cutoffDate`, `errorOccurrenceCount` over `requestsCount`.
-- [ ] **Result variables name the thing, not just the operation**: a bare past-participle or verb name like `var merged = concatRows(rsvBlock, leadBlock)` says HOW the value was produced but not WHAT it holds — merged *what*? Name the noun: `mergedRows` at minimum, `mergedRsvAndLeadRows` when the source blocks matter to later code. Same smell for `filtered`, `sorted`, `grouped`, `mapped`, `parsed`, and catch-alls like `result`/`output`/`response`. Prefer verbose, self-explanatory names that read like a fact about the value; the payoff comes when the variable is reused further down the method or during future implementation.
-- [ ] **Methods start with a verb; variables name the thing**: the noun rule above is for variables and fields only. A method that constructs, derives, or returns a value starts with a verb that signals its cost: `get*` / `is*` cheap, `build*` / `resolve*` / `compute*` derivation, `fetch*` / `load*` I/O. Flag every noun-only method name, private helpers included: `private static String personPath(int insuredPerson)` → `buildPersonPath(...)` or `getPersonPath(...)`; same for `proTectPath()`, `protocolPath()`, `coveragePath()`. Exempt: record accessors, static factories (`of`, `from`, `valueOf`), and fluent builder setters. Reviewer feedback says this recurs, so check every new or renamed method.
-- [ ] **Method name matches the method's scope**: `findBranchesForOrder` that also sets values is misleading. Name should include both actions or extract the mutation.
+- [ ] **Paired methods share a verb family**: `computeFromDate` / `computeToDate`, `shouldIncludeA` / `shouldIncludeB`. A mixed pair reads as two different kinds of operation.
+- [ ] **Units in names**: a value that holds a percentage, amount, or duration names its unit (`coveragePercentage`, `hasAnyPercentageCoverageSelected`, `timeoutSeconds`).
+- [ ] **No stutter**: `report.report()`, `order.orderId()` repeat the owner's name. Name the member for what it adds.
+- [ ] **Result variables name the thing, not just the operation**: a bare past-participle or verb name like `var merged = concatRows(primaryBlock, leadBlock)` says HOW the value was produced but not WHAT it holds — merged *what*? Name the noun: `mergedRows` at minimum, `mergedPrimaryAndLeadRows` when the source blocks matter to later code. Same smell for `filtered`, `sorted`, `grouped`, `mapped`, `parsed`, and catch-alls like `result`/`output`/`response`. Prefer verbose, self-explanatory names that read like a fact about the value; the payoff comes when the variable is reused further down the method or during future implementation.
+- [ ] **Methods start with a verb; variables name the thing**: the noun rule above is for variables and fields only. A method that constructs, derives, or returns a value starts with a verb that signals its cost: `get*` / `is*` cheap, `build*` / `resolve*` / `compute*` derivation, `fetch*` / `load*` I/O. Flag every noun-only method name, private and test helpers included: `private static String personPath(int insuredPerson)` → `buildPersonPath(...)` or `getPersonPath(...)`; same for `addressPath()`, `orderPath()`, `itemPath()`. Exempt: record accessors, static factories (`of`, `from`, `valueOf`), and fluent builder setters. Reviewer feedback says this recurs, so check every new or renamed method.
+- [ ] **Method name matches the method's scope**: `findBranchesForOrder` that also sets values is misleading. Name should include both actions or extract the mutation. The reverse also holds: a method that only checks a category is `isProductCategoryX`, not `shouldIncludeXBlock`, which promises a decision it does not make.
+- [ ] **Name rules after what the code sees**: a validation rule on `question05` is named for that field, not for a business meaning the backend cannot verify. Put the business meaning in Javadoc on the model field.
+- [ ] **Generic code carries no provider name**: a validation rule or utility that applies to every provider is named after the field or concept it checks, with no provider prefix.
 - [ ] **No ticket numbers in method/class names**: `handleOrderRequest()` not `handlePROJ123Order()`. Method names should describe behavior, not reference the ticket that created them.
 - [ ] **Class naming matches official casing**: follow the canonical brand/product casing as it is officially written
 - [ ] **No numeric suffixes**: `fetchContactIfExists()` not `fetchIfExistOrNull2()`
@@ -97,13 +104,15 @@ Sections: Code Style, Naming Precision, Java Type & Optional Patterns, Validatio
 - [ ] **Record names describe what they ARE, not what they're used in**: `OrderEmailData` (data for the email process) not `OrderEmailRecipient` (implies a person receiving something). If the name doesn't match the contents, rename it.
 - [ ] **Class names must not collide with programming terms**: `OldRecordExpirySet` suggests a collection; use `OldRecordExpiryKnown`. Avoid suffixes like `Set`, `List`, `Map` unless the class IS that data structure.
 - [ ] **Class responsibility clear from name**: value objects (`Money`), converters (`MoneyConverter`), and utilities (`MoneyUtils`) must be distinguishable. If reviewers ask "is this a util or a value object?", the name is wrong.
-- [ ] **String construction consistency**: before adding new `firstName + " " + lastName` logic, check existing implementations. Multiple strategies for the same concept create bugs.
+- [ ] **String construction consistency**: before adding new `firstName + " " + lastName` logic, check existing implementations. Multiple strategies for the same concept create bugs. Same for null-safe helpers: reuse the domain's existing utils class, and add new shared helpers there.
 
 ## Java Type & Optional Patterns
 - [ ] **Optional is a return type only**: do NOT wrap objects in Optional just to call `.ifPresent()`. Use plain null checks: `if (obj != null)` is clearer than `Optional.ofNullable(obj).ifPresent(...)`
 - [ ] **Never call `Optional.get()`**: use `.orElseThrow()`, `.map()`, `.flatMap()`, `.orElse()`
 - [ ] **`orElseThrow` pattern**: `.orElseThrow(() -> NotFoundException.byMessage("key", "Not found: %s", uuid))`
 - [ ] **Static factory methods preferred**: use `from()`, `of()`, `updateWith()` on entities/DTOs over inline construction
+- [ ] **Qualify factory calls with the class name**: write `CoreCoverage.from(...)`. A static import leaves a bare `from()` that hides what it creates.
+- [ ] **One set lookup over stacked checks**: `ALLOWED_VALUES.contains(value)` already rejects null-like, blank, and malformed input. Flag a regex plus `isBlank()` plus set check for the same value.
 - [ ] **Varargs for variable arguments**: `Object... args` instead of multiple overloads
 - [ ] **Return direct types**: don't wrap in `Supplier<>` if callers always call `.get()` immediately
 - [ ] **Chain builders in return statements**: avoid unnecessary local variables when method only constructs and returns
@@ -122,9 +131,10 @@ Sections: Code Style, Naming Precision, Java Type & Optional Patterns, Validatio
 - [ ] **`@NotNull` on message/DTO fields** where null would break processing
 - [ ] **Distinguish null from empty**: handle null set and empty set as distinct states explicitly
 - [ ] **Guard clauses first**: return null/empty early rather than at end; skip unnecessary steps
-- [ ] **Don't repeat DB query conditions in application code**: if the query already filters, trust it
+- [ ] **Trust guaranteed values**: remove a null or presence check when upstream validation (`@NotNull`, a validated payload) or the flow already guarantees the value. Same for DB query conditions: if the query already filters, trust it.
 - [ ] **Input normalization at earliest point**: normalize emails to lowercase in DTO/registration step
 - [ ] **Validate new password differs from old** in password change flows
+- [ ] **User-facing messages in plain language**: a validation message tells the user what to fix, with no technical terms or standard names ("ISO 3166-1 alpha-2").
 - [ ] **Custom validators consolidate annotations**: use `@PhoneNumber(required, min, max, maxLength)` instead of stacking `@NotBlank + @Size + @Pattern`. Make validators configurable with annotation parameters.
 - [ ] **Validation results are collections, not exceptions**: business validation failures return as `List<ValidationResult>`, not thrown. Empty = passed, non-empty = failed. Services create empty responses for failed validations.
 

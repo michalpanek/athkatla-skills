@@ -9,6 +9,7 @@ In addition to the line-by-line checklist, perform a holistic pass on the entire
   - Every acceptance criterion / requirement maps to a concrete change in the diff
   - No requirement is silently dropped, deferred, or partially implemented
   - No out-of-scope changes (scope creep) that belong in a separate PR
+  - Behaviour the spec does not define (a new skip condition, a chosen default, a mixed-value case) is a question for the product owner. Flag it as `[Spec]` so the author asks before merge.
   - Behavior matches spec wording — edge cases, error states, default values, error codes, validation messages
   - Tests cover the spec's acceptance criteria, not only the code paths that happen to exist
 

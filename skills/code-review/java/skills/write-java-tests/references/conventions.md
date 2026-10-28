@@ -1,6 +1,6 @@
 # Java Test Conventions
 
-The examples come from the reference Spring Boot project. When the project under test has its own base classes or utilities, use those and keep the pattern.
+The examples use placeholder names. When the project under test has its own base classes or utilities, use those and keep the pattern.
 
 ## Structure: Test Cases First, Helpers Last
 When opening a test file, developers care about test cases, not helper methods. Structure accordingly:
@@ -10,7 +10,7 @@ When opening a test file, developers care about test cases, not helper methods. 
 4. Private helper/factory methods at the **bottom**
 
 ## Sections: //given //when //then
-Every test method must have `// given`, `// when`, `// then` comment sections. Omit `// given` only if the test has no setup.
+Every test method must have `// given`, `// when`, `// then` comment sections. Omit `// given` only if the test has no setup. Write the markers bare: no text after them, and no other comments in the test.
 
 ```java
 @Test
@@ -30,10 +30,10 @@ void shouldRejectInvalidInput() {
 Do NOT add a `@Nested` class if you only have one group. Use `@Nested` when tests naturally split into 2+ groups with different setup (e.g., `WhenRequired` vs `WhenOptional`). Name nested classes descriptively (`WhenRequired`, `WhenCustomMaxLength`).
 
 ## Imports: No Full Package Paths
-Use imports instead of inline full package paths. Never write `new de.smartinsurtech.annex.lead.request.LeadRequest(...)`, import the class instead.
+Use imports instead of inline full package paths. Never write `new com.example.order.request.OrderRequest(...)`, import the class instead.
 
 ## Naming
-- Test methods: `should` prefix (`shouldRejectNull`, `shouldMapToAllianzOrderRequest`)
+- Test methods: `should` prefix (`shouldRejectNull`, `shouldMapToProviderOrderRequest`)
 - No redundant context in method names that the `@Nested` class already provides
 
 ## Capture Results Before Asserting
@@ -52,7 +52,7 @@ assertThat(result).isNotNull();
 
 ## Test Utilities
 - Use `TestUtil.readObjectFromFile()` for loading JSON test fixtures
-- Use `TestUtil.createPolicyHolder()` and similar factory methods from existing test utilities
+- Use the factory methods from existing test utilities (e.g. `TestUtil.createCustomer()`)
 - Use `@SpringBootTestProfile` for tests needing Spring context with H2
 
 ## Test Type Selection
@@ -71,7 +71,7 @@ class PhoneNumberValidatorTest {
 @SpringBootTestProfile
 class OfferPersistenceServiceTest {
     @InjectMocks private OfferPersistenceService service;
-    @Mock private AntraegeApiService antraegeApiService;
+    @Mock private ProviderApiService providerApiService;
 }
 ```
 
@@ -91,8 +91,8 @@ class OrderPersistenceServiceIntegrationTest extends TestPostgresqlContainer {
 @Testcontainers
 @DirtiesContext
 @TestPropertySource(properties = {"server.port=8090"})
-public class CardifOrderIntegrationTest extends TestPostgresqlContainer {
-    @MockitoBean MicrosoftTeamsNotifier microsoftTeamsNotifier;
+public class OrderEndToEndTest extends TestPostgresqlContainer {
+    @MockitoBean NotificationService notificationService;
 }
 ```
 
@@ -160,7 +160,7 @@ void shouldSendCorrectNumberOfOrders(boolean first, boolean second, int send, in
 ```java
 @SpringBootTestProfile
 @AutoConfigureMockMvc
-class InsuranceFormControllerTest {
+class OrderControllerTest {
     private MockMvc mockMvc;
 
     @BeforeEach
@@ -173,8 +173,8 @@ class InsuranceFormControllerTest {
 
 // With security context:
 mockMvc.perform(
-    get("/form/insurance/residual-debt/1")
-        .with(user("user").authorities(() -> "ANNEX_RSV_INSURANCE_READ"))
+    get("/orders/1")
+        .with(user("user").authorities(() -> "ORDER_READ"))
 ).andExpect(status().isOk());
 ```
 
@@ -183,8 +183,8 @@ mockMvc.perform(
 ```java
 @DynamicPropertySource
 static void dynamicProperties(DynamicPropertyRegistry registry) {
-    registry.add("cardif.url", () -> "http://localhost:8090/test/cardif/order/");
-    registry.add("europace.api.antraege_url", () -> "http://localhost:8090/test/antraege");
+    registry.add("provider.url", () -> "http://localhost:8090/test/provider/order/");
+    registry.add("upstream.api.documents_url", () -> "http://localhost:8090/test/documents");
 }
 ```
 
@@ -192,10 +192,10 @@ static void dynamicProperties(DynamicPropertyRegistry registry) {
 
 ```java
 var exception = assertThrows(
-    LoanContractNoContentException.class,
-    () -> service.fetchInsuranceForm(loanContract));
+    OrderNotFoundException.class,
+    () -> service.fetchOrder(orderId));
 
-assertThat(exception.getStatus(), is(HttpStatus.NO_CONTENT));
+assertThat(exception.getStatus(), is(HttpStatus.NOT_FOUND));
 ```
 
 ## Log Verification
@@ -234,13 +234,11 @@ void shouldPassWithValidAddress() {
 ```
 src/test/resources/
 ├── order/               # Order test data (order.json, coreOrder.json)
-├── translator/          # Mapper test data by insurer
-│   ├── creditlife/
-│   ├── cardif/
-│   ├── provinzial/
-│   └── allianz/
-├── responses/           # Insurer response fixtures by insurer
-├── requests/            # Insurer request fixtures
+├── translator/          # Mapper test data by provider
+│   ├── provider-a/
+│   └── provider-b/
+├── responses/           # Provider response fixtures by provider
+├── requests/            # Provider request fixtures
 ├── entities/            # Database entity fixtures
 ├── e2e/                 # End-to-end test data
 │   ├── offer/
@@ -249,7 +247,7 @@ src/test/resources/
 └── validation/          # Validation test fixtures
 ```
 
-Naming: `<domain><Type><OptionalDetail>.json` (e.g. `creditlifeInsuranceCaseEntity.json`)
+Naming: `<domain><Type><OptionalDetail>.json` (e.g. `providerOrderEntity.json`)
 
 ## JSON & ObjectMapper in Tests
 
@@ -268,9 +266,9 @@ var order = (Order) TestUtil.readObjectFromFile("/order/order.json", Order.class
 ```
 
 ## Reference test files
-Before writing a new test class, review 1-2 existing test files in the project to match the current conventions. Good reference files:
-- `AllianzOrderMapperTest.java` (simple Spring context test)
-- `AntraegeDocumentsRetrieverTest.java` (mock-based test with setup)
-- `PriceValidatorTest.java` (pure unit test with //given //when //then)
-- `PhoneNumberValidatorTest.java` (parameterized with @Nested groups)
-- `CardifOrderIntegrationTest.java` (full E2E with TestContainers)
+Before writing a new test class, review 1-2 existing test files of the same type in the project to match the current conventions:
+- a mapper test with a simple Spring context
+- a mock-based test with setup
+- a pure unit test with //given //when //then
+- a parameterized test with @Nested groups
+- a full E2E test with Testcontainers

@@ -16,13 +16,15 @@ Sections: Logging, Messaging & Events, Async Correctness, Scheduled Jobs, SOAP &
 - [ ] **`[CATEGORY]` prefix pattern** for Kibana-searchable log lines: `log.info("[DEPRECATED ENDPOINT] ...")`, `log.info("[TECHNICAL REVIEW] Creating...")`
 - [ ] **Include contextual identifiers in every log**: UUIDs, location keys, relevant entity IDs
 - [ ] **Log no-op outcomes**: when a condition results in nothing sent/updated, log why
+- [ ] **Log inline**: put the log in the early exit or in the mapping method that already runs. Flag a method or an `if` that exists only to log.
+- [ ] **Log what the ticket needs**: flag warn logs for an optional field being absent, new tracking, and new MDC keys that no requirement asks for.
 - [ ] **Log message grammar**: log messages should be grammatically correct English. "About to process", not "About to processing"
 - [ ] **Mask PII in logs**: phone numbers as `514 *** ***`, never log message content in plain text
 - [ ] **No `System.out.println`**: replace with proper log levels or remove
 - [ ] **`@Slf4j` cannot be on interfaces**: only on classes
 - [ ] **Log timing metrics** for significant operations: "Time to fetch all last messages"
 - [ ] **Log important operations**: additions, deletions, significant state changes all deserve log entries
-- [ ] **MDC cleanup convention**: `Slf4jMDCFilter` calls `MDC.clear()` in a `finally` block at the servlet filter level, so HTTP request threads are always cleaned up automatically. Manual `removeXFromLogs()` calls are for within-request clarity only (e.g., clearing a key before processing a second item). Do NOT flag missing `finally` blocks around MDC removal in controller/service code called from HTTP requests. **Exception**: `@Scheduled` methods bypass the servlet filter, so MDC cleanup at the end of scheduled methods is important.
+- [ ] **MDC cleanup convention**: first find what clears the MDC. A servlet filter (e.g. `Slf4jMDCFilter`) that calls `MDC.clear()` in `finally` cleans HTTP request threads. An aspect or task decorator that clears it around `@Scheduled` methods cleans scheduler threads. Flag a missing cleanup only on a thread type that no such mechanism covers. Manual `removeXFromLogs()` calls are for within-request clarity only (e.g., clearing a key before processing a second item).
 - [ ] **MDC keys follow established set**: `request_id`, `process_id`, `case_id`
 
 ## Messaging & Events
@@ -55,6 +57,7 @@ Sections: Logging, Messaging & Events, Async Correctness, Scheduled Jobs, SOAP &
 - [ ] **WSDL code generation**: CXF maven plugin generates from WSDL/XSD. Never hand-edit generated classes. Add Lombok `@Getter`/`@Setter` annotations to generated classes.
 - [ ] **Resilience4j retry config**: separate retry names per external API endpoint. Retry on `WebClientResponseException` only.
 - [ ] **WebClient `.block()` for synchronous calls**: acceptable in non-WebFlux application. Wrap with Resilience4j retry decorator.
+- [ ] **Validate before the provider fails**: when a provider answers 5xx for missing or bad input, add a validation rule for that input, so the user sees what to fix instead of a technical error.
 - [ ] **SSL context via custom provider**: use your certificate provider for mutual TLS. Never hardcode certificate paths.
 
 ## Email & Notifications
@@ -67,12 +70,18 @@ Sections: Logging, Messaging & Events, Async Correctness, Scheduled Jobs, SOAP &
 **Test value first:** apply `test-value.md` (the value gate, low-signal classes, and missing-coverage stance) before any item below. Grade only the tests that pass the gate.
 
 - [ ] **Test cases first, helpers last**: when opening a test file, you see tests immediately, not setup
-- [ ] **`//given //when //then`** sections in every test method
+- [ ] **`//given //when //then`** sections in every test method, as bare markers. Flag text after a marker and every other comment in a test.
+- [ ] **Constants at the top of the test class**, private
 - [ ] **`@Nested` only with 2+ groups**: don't nest if there's only one group
 - [ ] **Descriptive `@Nested` names**: `WhenRequired`, `WhenOptional`, not `RequiredDefaults`
 - [ ] **Capture results before asserting**: `var result = ...` then `assertThat(result)...`
 - [ ] **`any()` with expected class**: use `any(OrderRequest.class)` not bare `any()`
-- [ ] **Extract expected values to `//given`**: never inline magic strings or numbers in assertions. Create named variables like `var expectedTotal = ...`
+- [ ] **Extract expected values to `//given`**: never inline magic strings or numbers in assertions. Create named variables like `var expectedTotal = ...`. Read IDs and names from the fixture object, and compute derived values with a helper (`calculateInsuredSum(percentage, basis)`), not hard-coded numbers.
+- [ ] **Fixtures set every new field to a real value**: a `null` for a new field hides whether the code handles it.
+- [ ] **Reuse existing fixture loaders**: JSON payloads live in `src/test/resources/` and load through the project's helper, not inline strings or a new loader.
+- [ ] **One mapping concern per test method**: add a new test method for a new mapping case instead of appending assertions to an existing payload-to-payload test.
+- [ ] **Assert the absence the rule demands**: when a business rule excludes something (the secondary person gets no death coverage), assert that it is absent.
+- [ ] **Validation rules tested from the controller** where the setup allows: payload in, validation result out.
 - [ ] **Name all magic numbers**: `EXPECTED_ITEM_COUNT` not raw `6`
 - [ ] **Extract deeply nested getter chains**: if `response.orderInformation().get(0).orderDetails().items()` appears 3+ times, create a helper method
 - [ ] **Test methods under 100 lines**: extract setup and assertion helpers
