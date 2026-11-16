@@ -1,6 +1,6 @@
 ---
 name: java-review
-description: Single-agent Java Spring Boot code review. Detects the project's stack, applies only the relevant rules, then runs clean-code and test-value passes.
+description: Single-agent Java or Kotlin Spring Boot code review. Detects the project's stack, applies only the relevant rules, then runs clean-code and test-value passes.
 argument-hint: "[optional: file path or diff range, e.g. HEAD~3..HEAD]"
 disable-model-invocation: true
 ---
@@ -17,15 +17,16 @@ Print the stack summary before continuing. All subsequent steps respect the skip
 
 ## Step 1 — Gather changes
 
-```bash
-git diff --name-only HEAD
-git status --short
-git diff HEAD
-```
+Choose the change source:
 
-If `$ARGUMENTS` is provided, treat it as the diff range or file list to review. Otherwise default to uncommitted changes on `HEAD`.
+- **Committed changes.** `$ARGUMENTS` is a commit range `A..B`, for example `HEAD~3..HEAD`. Run `git diff --name-only A..B` and `git diff A..B`. Read each file at commit `B` with `git show B:<path>`. The working tree can differ from `B`, so do not read it. Set `{FILE_SOURCE}` to "commit `B` (`git show B:<path>`)".
+- **Local changes.** `$ARGUMENTS` is empty or a file list. Run `git diff --name-only HEAD`, `git status --short` and `git diff HEAD`. These show staged, unstaged and untracked files. Read each file from the working tree. Set `{FILE_SOURCE}` to "the working tree".
 
-Filter to `.java` and `.groovy` (Spock specs). Keep test resource files (`src/test/resources/**`) in view: the Test Value gate needs the fixtures. If no `.java` or `.groovy` files changed, report "No Java files to review" and stop.
+Print the change source before you filter.
+
+Filter to `.java`, `.kt`, `.kts` and `.groovy` (Spock specs). Keep test resource files (`src/test/resources/**`) in view: the Test Value gate needs the fixtures. If no file matches, report "No Java or Kotlin files to review" and stop.
+
+If a `.kt` or `.kts` file matches, read `@../../checklists/java/kotlin-reading.md`. Apply every checklist rule to Kotlin files through it. Print the count before Step 2: "Reviewing N Java, M Kotlin, K Groovy files".
 
 ## Step 2 — Load project context
 
@@ -39,7 +40,7 @@ A project rule wins over a checklist item when they conflict. Move to Step 3 onc
 
 ## Step 3 — Walk the checklist
 
-Apply every applicable item from each section against every changed file. Read entire changed files (not just the diff hunks).
+Apply every applicable item from each section against every changed file. Read each changed file in full from `{FILE_SOURCE}` (Step 1), not only the diff hunks.
 
 ### Architecture, Spring Config, Package Placement, Configuration, Dependencies
 @../../checklists/java/01-architecture-spring-config.md
@@ -55,7 +56,7 @@ Apply every applicable item from each section against every changed file. Read e
 
 ## Step 4 — Clean-Code Pass (clarity, maintainability, test value)
 
-Invoke `athkatla-skills:clean-code` via the Skill tool. Apply its standards and severity rubric to every changed file. If the skill is not available, apply this fallback:
+Apply this checklist to every changed file. Use the Step 6 severity guidelines. The `athkatla-skills:clean-code` skill covers TypeScript only, so do not invoke it:
 @../../checklists/java/clean-code.md
 
 Then run the Test Value gate on every new test in the change. A test that fails the gate gets only the removal finding: drop its Step 3 test-style findings.

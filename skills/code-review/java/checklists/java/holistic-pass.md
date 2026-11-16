@@ -102,7 +102,7 @@ The bar is higher than "it works" — correct behaviour and passing tests do not
 
 ## Instructions
 
-1. Read ALL changed files in full (not just the diff)
+1. Read ALL changed files in full from {FILE_SOURCE}, not only the diff
 2. Think about the change as a whole: what is this PR trying to accomplish?
 3. Look for issues that would only be visible by reading multiple files together
 4. Do NOT repeat standard checklist items (other agents cover those). Focus on what emerges from the COMBINATION of changes.

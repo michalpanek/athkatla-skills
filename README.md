@@ -16,7 +16,7 @@ One plugin ships every skill. Invoke a skill as `/athkatla-skills:<skill-name>`,
 | Area | Skills | Purpose |
 |---|---|---|
 | Code review | `ts-review`, `ts-review-lite`, `ts-review-multi-agent` | Opinionated TypeScript / JavaScript code review (single-agent, lite, multi-agent) |
-| Code review | `java-review`, `java-review-multi-agent` | Opinionated Java Spring Boot code review (single-agent + multi-agent) |
+| Code review | `java-review`, `java-review-multi-agent` | Opinionated Java or Kotlin Spring Boot code review (single-agent + multi-agent) |
 | Code review | `write-java-tests` | Write Java Spring Boot tests that earn their place: value gate first, then project conventions (auto-trigger) |
 | Code review | `clean-code` | Clean-code standards for TS / JS: declarative style, DRY, readonly immutability, SOLID, naming, error handling (auto-trigger) |
 | Security | `dependabot-review` | Per-PR risk analysis for open Dependabot PRs (skeletal) |

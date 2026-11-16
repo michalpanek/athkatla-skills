@@ -1,13 +1,13 @@
 ---
 name: java-review-multi-agent
-description: Java Spring Boot code review using 6 parallel subagents (scoped, holistic, clean-code). Detects the project's stack and applies only the relevant rules; best for large PRs spanning multiple domains.
+description: Java or Kotlin Spring Boot code review using 6 parallel subagents (scoped, holistic, clean-code). Detects the project's stack and applies only the relevant rules; best for large PRs spanning multiple domains.
 argument-hint: "[optional: file path or diff range, e.g. HEAD~3..HEAD]"
 disable-model-invocation: true
 ---
 
 # Java Spring Boot Code Review (multi-agent)
 
-Dispatch 6 parallel subagents. Four follow strict scoped checklists; a fifth holistic agent reviews the entire changeset without a checklist to catch emergent issues; a sixth reviews through the clean-code lens using `athkatla-skills:clean-code`. Aggregate findings into one severity-grouped report. **First detect the project's stack and only apply rules for tools actually present — all subagents respect the same skip-rules.**
+Dispatch 6 parallel subagents. Four follow strict scoped checklists; a fifth holistic agent reviews the entire changeset without a checklist to catch emergent issues; a sixth reviews through the clean-code lens with the Java clean-code checklist. Aggregate findings into one severity-grouped report. **First detect the project's stack and only apply rules for tools actually present — all subagents respect the same skip-rules.**
 
 ## Step 0 — Detect stack
 
@@ -17,15 +17,16 @@ Print the stack summary before continuing. Include the same stack-summary + skip
 
 ## Step 1 — Gather changes
 
-```bash
-git diff --name-only HEAD
-git status --short
-git diff HEAD
-```
+Choose the change source:
 
-If `$ARGUMENTS` is provided, treat as diff range or file list. Otherwise default to uncommitted changes on `HEAD`.
+- **Committed changes.** `$ARGUMENTS` is a commit range `A..B`, for example `HEAD~3..HEAD`. Run `git diff --name-only A..B` and `git diff A..B`. Read each file at commit `B` with `git show B:<path>`. The working tree can differ from `B`, so do not read it. Set `{FILE_SOURCE}` to "commit `B` (`git show B:<path>`)".
+- **Local changes.** `$ARGUMENTS` is empty or a file list. Run `git diff --name-only HEAD`, `git status --short` and `git diff HEAD`. These show staged, unstaged and untracked files. Read each file from the working tree. Set `{FILE_SOURCE}` to "the working tree".
 
-Filter to `.java` and `.groovy` (Spock specs). Keep test resource files (`src/test/resources/**`) in the changed-files list: the Test Value gate needs the fixtures. If no `.java` or `.groovy` files match, report "No Java files to review" and stop.
+Print the change source before you filter.
+
+Filter to `.java`, `.kt`, `.kts` and `.groovy` (Spock specs). Keep test resource files (`src/test/resources/**`) in the changed-files list: the Test Value gate needs the fixtures. If no file matches, report "No Java or Kotlin files to review" and stop.
+
+If a `.kt` or `.kts` file matches, read `@../../checklists/java/kotlin-reading.md` and put its full content in `{KOTLIN_READING}`. Else set `{KOTLIN_READING}` to "No Kotlin files in this change". Print the count before Step 2: "Reviewing N Java, M Kotlin, K Groovy files".
 
 ## Step 2 — Load project context
 
@@ -47,6 +48,8 @@ Each scoped agent (1-4) receives:
 - The severity guidelines
 - The changed-files list and full diff
 - `{PROJECT_RULES}` from Step 2. Every agent gets it; append it to the holistic prompt of agent 5 as a `## Project Rules` section.
+- `{FILE_SOURCE}` from Step 1. Every agent gets it; agent 5 gets it in the holistic prompt.
+- `{KOTLIN_READING}` from Step 1. Every agent gets it; append it to the holistic prompt of agent 5 as a `## Kotlin Reading` section.
 - The "Scoped Subagent Prompt Template" at the end of this file (agent 5 uses the holistic prompt from `@../../checklists/java/holistic-pass.md` instead; agent 6 uses the "Clean-Code Subagent Prompt Template")
 
 ### Agent 1 — Architecture & Spring Configuration
@@ -76,7 +79,7 @@ Scope: cross-file consistency, design coherence, integration points, subtle bugs
 Prompt template + axes definition + spec-discovery guidance:
 @../../checklists/java/holistic-pass.md
 
-### Agent 6 — Clean Code (uses `athkatla-skills:clean-code`)
+### Agent 6 — Clean Code
 Scope: readability, maintainability, and test value. Rules live in the clean-code and test-value checklists (see the prompt template below), not here.
 Prompt template: see "Clean-Code Subagent Prompt Template" at the end of this file.
 Agent 6 also owns the method-naming rule (methods start with a verb) and the comment review scan; Agent 3 checks both too. Expected overlap with Agent 3's Naming Precision / Code Style items and Agent 4's Test Value findings is fine; aggregation keeps both.
@@ -103,15 +106,18 @@ End with PASS / FAIL. FAIL if any CRITICAL or HIGH finding, including `[Spec]`-t
 
 ## Scoped Subagent Prompt Template
 
-Use this when constructing each scoped subagent's prompt. Replace `{AGENT_GROUP_NAME}`, `{STACK_SUMMARY}`, `{CHECKLIST}`, `{PROJECT_RULES}`, `{CHANGED_FILES}`, and `{DIFF}`.
+Use this when constructing each scoped subagent's prompt. Replace `{AGENT_GROUP_NAME}`, `{FILE_SOURCE}`, `{STACK_SUMMARY}`, `{KOTLIN_READING}`, `{CHECKLIST}`, `{PROJECT_RULES}`, `{CHANGED_FILES}`, and `{DIFF}`.
 
 ```
-You are a specialized Java Spring Boot code reviewer focusing EXCLUSIVELY on: {AGENT_GROUP_NAME}.
+You are a specialized Java and Kotlin Spring Boot code reviewer focusing EXCLUSIVELY on: {AGENT_GROUP_NAME}.
 
 STRICT SCOPING: review only the checklist items provided below. Other agents cover everything outside this scope.
 
 ## Stack Summary & Skip Rules
 {STACK_SUMMARY}
+
+## Kotlin Reading
+{KOTLIN_READING}
 
 ## Project Rules (win over the checklist on conflict)
 {PROJECT_RULES}
@@ -129,7 +135,7 @@ STRICT SCOPING: review only the checklist items provided below. Other agents cov
 <inline content of @../../checklists/java/severity-guidelines.md>
 
 ## Instructions
-1. Read each changed/new Java or Groovy file in full (not just the diff).
+1. Read each changed/new Java, Kotlin or Groovy file in full from {FILE_SOURCE}, not only the diff. Apply every rule to Kotlin files through the Kotlin Reading section.
 2. Check EVERY applicable checklist item against EVERY changed file. Apply the Project Rules that fall in your scope with the same weight as checklist items.
 3. For each finding, report:
    - Severity (CRITICAL / HIGH / MEDIUM / LOW)
@@ -145,16 +151,19 @@ Structural red flags (beyond your checklist): if a change in your files clearly 
 
 ## Clean-Code Subagent Prompt Template
 
-Use this for Agent 6. Replace `{CHANGED_FILES}`, `{DIFF}`, `{PROJECT_RULES}`, `{CLEAN_CODE_FALLBACK}` (inline content of `@../../checklists/java/clean-code.md`), `{TEST_VALUE}` (inline content of `@../../checklists/java/test-value.md`), `{METHOD_NAMING}` (inline the "Methods start with a verb" item from `@../../checklists/java/03-code-quality-type-safety.md` § Naming Precision), and `{COMMENT_RULES}` (inline content of `@../../../clean-code/skills/clean-code/references/comments.md`).
+Use this for Agent 6. Replace `{FILE_SOURCE}`, `{CHANGED_FILES}`, `{KOTLIN_READING}`, `{DIFF}`, `{PROJECT_RULES}`, `{CLEAN_CODE}` (inline content of `@../../checklists/java/clean-code.md`), `{TEST_VALUE}` (inline content of `@../../checklists/java/test-value.md`), `{METHOD_NAMING}` (inline the "Methods start with a verb" item from `@../../checklists/java/03-code-quality-type-safety.md` § Naming Precision), and `{COMMENT_RULES}` (inline content of `@../../../clean-code/skills/clean-code/references/comments.md`).
 
 ```
 You are a clean-code reviewer focusing EXCLUSIVELY on code clarity, maintainability, and test value. Stack-specific rules, architecture, security, and test style belong to other agents.
 
-First, invoke `athkatla-skills:clean-code` via the Skill tool and apply its standards and severity rubric to the changed files. If the skill is not available, apply this fallback checklist instead:
-{CLEAN_CODE_FALLBACK}
+## Clean-Code Checklist
+{CLEAN_CODE}
 
-## Project Rules (win over the fallback on conflict)
+## Project Rules (win over the checklist on conflict)
 {PROJECT_RULES}
+
+## Kotlin Reading
+{KOTLIN_READING}
 
 ## Changed Files
 {CHANGED_FILES}
@@ -175,7 +184,7 @@ First, invoke `athkatla-skills:clean-code` via the Skill tool and apply its stan
 <inline content of @../../checklists/java/severity-guidelines.md>
 
 ## Instructions
-1. Read each changed/new Java or Groovy file in full (not just the diff).
+1. Read each changed/new Java, Kotlin or Groovy file in full from {FILE_SOURCE}, not only the diff. Apply every rule to Kotlin files through the Kotlin Reading section.
 2. Judge only what this change introduces or worsens; do not demand refactors of untouched legacy code.
 3. Run the Test Value gate on every new test in the change (Test Value section above).
 4. Check every new or renamed method name against the Method Naming rule above. Tag findings `[Clean Code]`.

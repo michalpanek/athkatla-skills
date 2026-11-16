@@ -11,18 +11,25 @@ test -f build.gradle && echo "gradle-groovy"
 test -f build.gradle.kts && echo "gradle-kotlin"
 
 # Multi-module project
-grep -c '<module>' pom.xml 2>/dev/null
+cat pom.xml 2>/dev/null | awk '/<module>/ { n++ } END { print n + 0 }'
 ls settings.gradle settings.gradle.kts 2>/dev/null
 
 # Java version (rough check)
-grep -oE '<java.version>[^<]+' pom.xml 2>/dev/null || grep -oE 'sourceCompatibility\s*=\s*[^\s]+' build.gradle* 2>/dev/null
+cat pom.xml build.gradle build.gradle.kts 2>/dev/null | awk '/<java.version>|sourceCompatibility|languageVersion|jvmTarget/ { print }'
 
 # Application properties shape
 ls src/main/resources/application*.properties src/main/resources/application*.yml src/main/resources/application*.yaml 2>/dev/null
 
 # Spock tests present?
 find src/test -name '*.groovy' 2>/dev/null | head -1
+
+# Kotlin present?
+cat build.gradle.kts build.gradle pom.xml 2>/dev/null | awk '/kotlin\("jvm"\)|org\.jetbrains\.kotlin\.jvm|kotlin-gradle-plugin|kotlin-maven-plugin/ { print "kotlin"; exit }'
+find . -path '*/src/main/kotlin' -type d -not -path '*/build/*' 2>/dev/null | head -1
+cat build.gradle.kts build.gradle 2>/dev/null | awk '/kotlin\("jvm"\)/ { print }'
 ```
+
+Kotlin is present when one of the first two Kotlin commands prints a result. The third command shows the Kotlin version. Report both in the stack summary.
 
 Read `pom.xml` (or `build.gradle` / `build.gradle.kts`) and inspect declared dependencies.
 
@@ -46,6 +53,7 @@ For each row: if the indicator is absent, skip the listed checklist scope.
 | `org.spockframework` (or `*.groovy` in `src/test/`) | Skip Spock-specific rules (`given:`/`when:`/`then:`, `@Shared`, GString interpolation); apply JUnit-only rules |
 | `org.testcontainers` | Skip `TestPostgresqlContainer` patterns; adapt to project's integration-test base |
 | `nl.altindag:log-captor` | Skip `LogCaptor` rules |
+| Kotlin (`kotlin("jvm")` plugin or `src/main/kotlin/`) | Skip `kotlin-reading.md` |
 | `application.properties` present, no `.yml` | Apply "properties not YAML" rule |
 | `application.yml` / `.yaml` present | Skip "properties not YAML" rule; project chose YAML |
 | Multi-module pom.xml / `settings.gradle` with `include(...)` | Apply multi-module rules: package placement across modules, FK constraints in migration modules, etc. |
@@ -62,6 +70,7 @@ Before starting the review, print a single stack-summary block:
 ```
 Stack detected:
 - Java 21
+- Kotlin: NOT detected → Java rules only (when detected: "Kotlin 1.9 → applying kotlin-reading.md to .kt/.kts files")
 - Spring Boot 3.3 (Maven, single-module)
 - spring-boot-starter-web, spring-boot-starter-data-jpa
 - Lombok 1.18
