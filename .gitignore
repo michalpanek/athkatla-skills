@@ -44,3 +44,6 @@ npm-debug.log*
 .idea
 .cursor
 .vscode
+
+# Python
+__pycache__/

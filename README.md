@@ -29,6 +29,7 @@ One plugin ships every skill. Invoke a skill as `/athkatla-skills:<skill-name>`,
 | Productivity | `show-me-html` | Same as `show-me`, but writes the whole answer to one styled HTML page (Mermaid data flow and file relation diagrams with a colour key, highlighted code and diffs, light and dark) and opens it in the browser |
 | UX | `ux-site-mapper`, `ux-ui-auditor` | Systemic UX/UI audit for Next.js apps: route mapping + principles-based audit (auto-trigger) |
 | Meta | `optimize-agent-md` | Audit + split a monolithic `CLAUDE.md` / `AGENTS.md` / `GEMINI.md` into a router + per-area files |
+| Meta | `home-repo-migration` | Move a set of related repos to the Home Repo pattern: one local Home with the shared skills, docs and repo pointers, agent docs per repo on a branch, gated PRs and an optional publish step |
 | Meta | `promote-rules-to-skills` | Promote `.claude/rules/*.md` into auto-discoverable skills |
 
 All manual-invocation skills use `disable-model-invocation: true`. Code-review skills detect the project's stack in Step 0 and apply only relevant rules.
