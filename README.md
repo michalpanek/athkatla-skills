@@ -27,6 +27,7 @@ One plugin ships every skill. Invoke a skill as `/athkatla-skills:<skill-name>`,
 | Productivity | `spade-it` | Facilitate a full S.P.A.D.E. decision session for hard contested decisions |
 | Productivity | `show-me` | Show the current topic visually and re-pitch it in simple English, grounded in the ticket (adapted from HumanLayer `show-me` and Matt Pocock `wait-what`, see Credits) |
 | Productivity | `show-me-html` | Same as `show-me`, but writes the whole answer to one styled HTML page (Mermaid data flow and file relation diagrams with a colour key, highlighted code and diffs, light and dark) and opens it in the browser |
+| Productivity | `verify-assumption` | Put an assumption from the session on trial: a fresh advisor session on a model that you choose acts as prosecutor, then up to five blind sub-agents repeat the trial until one converges with the advisor (opens a Herdr pane when available) |
 | UX | `ux-site-mapper`, `ux-ui-auditor` | Systemic UX/UI audit for Next.js apps: route mapping + principles-based audit (auto-trigger) |
 | Meta | `optimize-agent-md` | Audit + split a monolithic `CLAUDE.md` / `AGENTS.md` / `GEMINI.md` into a router + per-area files |
 | Meta | `home-repo-migration` | Move a set of related repos to the Home Repo pattern: one local Home with the shared skills, docs and repo pointers, agent docs per repo on a branch, gated PRs and an optional publish step |

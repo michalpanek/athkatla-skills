@@ -19,6 +19,7 @@
     "./skills/productivity/productivity/skills/",
     "./skills/productivity/spade-it/skills/",
     "./skills/productivity/show-me/skills/",
+    "./skills/productivity/verify-assumption/skills/",
     "./skills/meta/optimize-agent-md/skills/",
     "./skills/meta/promote-rules-to-skills/skills/",
     "./skills/meta/home-repo/skills/",
